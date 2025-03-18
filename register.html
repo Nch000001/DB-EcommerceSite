@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>會員註冊</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F5F5F5;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1E3A8A;
+            padding: 15px 20px;
+            color: white;
+        }
+        .navbar .logo a {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-links a {
+            background-color: #D4AF37;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
+
+        .register-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 60px;
+        }
+        .register-box {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        .register-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1E3A8A;
+        }
+        .register-box input[type="text"], 
+        .register-box input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #CCC;
+            border-radius: 8px;
+        }
+        .register-box input[type="submit"] {
+            width: 100%;
+            background-color: #1E3A8A;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .register-box input[type="submit"]:hover {
+            background-color: #163372;
+        }
+        .register-box .login-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .register-box .login-link a {
+            color: #1E3A8A;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo"><a href="index.html">LOGO</a></div>
+        <div class="nav-links">
+            <a href="index.html">會員</a>
+            <a href="index.html">問題</a>
+            <a href="register.html">註冊</a>
+            <a href="login.html">登入</a>
+        </div>
+    </div>
+
+    <div class="register-container">
+        <div class="register-box">
+            <h2>會員註冊</h2>
+            <form action="register.php" method="POST">
+                <input type="text" name="name" placeholder="姓名" required />
+                <input type="text" name="person_id" placeholder="身分證字號" required />
+                <input type="password" name="password" placeholder="密碼" required />
+                <input type="submit" value="註冊">
+            </form>
+            <div class="login-link">
+                已有帳號？<a href="login.html">點此登入</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
