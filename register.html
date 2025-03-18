@@ -11,7 +11,7 @@
             font-family: 'Noto Sans TC', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #F5F5F5;
+            background-color: #F0F4F8;
         }
         .navbar {
             display: flex;
@@ -35,85 +35,210 @@
             background-color: #D4AF37;
             color: white;
             text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 20px;
+            padding: 8px 15px;
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+        }
+        .nav-links a:hover {
+            background-color: #b88a20;
         }
 
         .register-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 60px;
+            margin-top: 50px;
+            padding: 20px;
         }
         .register-box {
             background-color: white;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-            width: 400px;
+            padding: 40px 35px;
+            border-radius: 16px;
+            box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
         }
         .register-box h2 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: #1E3A8A;
         }
-        .register-box input[type="text"], 
-        .register-box input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+        .register-box input[type="text"],
+        .register-box input[type="email"],
+        .register-box input[type="tel"],
+        .register-box input[type="password"],
+        .register-box input[type="date"],
+        .register-box input[type="submit"],
+        .register-box button,
+        .register-box textarea {
+            width: 80%;           /* 設為 80%，不會太滿 */
+            max-width: 350px;     /* 最大不超過 350px */
+            padding: 14px;
+            margin: 10px auto;    /* 自動左右置中 */
+            display: block;       /* 讓 margin auto 生效 */
             border: 1px solid #CCC;
-            border-radius: 8px;
+            border-radius: 10px;
+            transition: border-color 0.3s ease;
         }
+
+        .register-box textarea {
+            resize: vertical;     /* 保留高度調整 */
+        }
+        .register-box input:focus,
+        .register-box textarea:focus {
+            outline: none;
+            border-color: #1E3A8A;
+            box-shadow: 0 0 5px rgba(30, 58, 138, 0.3);
+        }
+        .register-box button,
         .register-box input[type="submit"] {
             width: 100%;
             background-color: #1E3A8A;
             color: white;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 12px;
+            transition: background-color 0.3s ease, transform 0.2s;
         }
+        .register-box button:hover,
         .register-box input[type="submit"]:hover {
             background-color: #163372;
+            transform: translateY(-2px);
         }
         .register-box .login-link {
-            margin-top: 15px;
+            margin-top: 18px;
             text-align: center;
+            font-size: 14px;
         }
         .register-box .login-link a {
             color: #1E3A8A;
             text-decoration: none;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 500px) {
+            .register-box {
+                padding: 30px 20px;
+            }
         }
     </style>
+
+    <script>
+        function validateBasicInfo() {
+            let form = document.forms["registerForm"];
+            let requiredFields = ["username", "email", "name", "phone", "birthday", "address", "password", "confirm_password"];
+
+            for (let i = 0; i < requiredFields.length; i++) {
+                let field = form[requiredFields[i]];
+                if (!field.value.trim()) {
+                    alert(field.placeholder + " 不能為空！");
+                    field.focus();
+                    return false;
+                }
+            }
+
+            // 檢查電話格式
+            let phone = form["phone"].value;
+            let phonePattern = /^09\d{8}$/;
+            if (!phonePattern.test(phone)) {
+                alert("電話號碼格式不正確，應為09開頭的10位數字。");
+                return false;
+            }
+
+            // 檢查密碼一致
+            let password = form["password"].value;
+            let confirmPassword = form["confirm_password"].value;
+            if (password !== confirmPassword) {
+                alert("密碼與確認密碼不一致！");
+                return false;
+            }
+
+            // 基本資料通過 → 顯示驗證碼區
+            document.getElementById('verification-section').classList.remove('hidden');
+            document.getElementById('basic-info-btn').disabled = true;
+            alert("基本資料驗證成功，請進行 Gmail 驗證。");
+            return false; // 阻止送出表單
+        }
+
+        function sendVerificationCode() {
+            let email = document.getElementById("email").value;
+            if (!email) {
+                alert("請輸入 Gmail！");
+                return;
+            }
+
+            fetch('sent_email.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code) {
+                        sessionStorage.setItem("email_code", data.code);
+                        alert("驗證碼已成功寄出！\n請至您的 Gmail 收取，並檢查垃圾郵件匣。");
+                    } else {
+                        alert("發送失敗：" + data.error);
+                    }
+                })
+                .catch(error => alert("發送失敗，請稍後再試！"));
+        }
+
+        function finalSubmit() {
+            let emailCode = document.forms["registerForm"]["email_code"].value;
+            if (emailCode !== sessionStorage.getItem("email_code")) {
+                alert("驗證碼不正確！");
+                return false;
+            }
+            alert("註冊成功！");
+            return true;
+        }
+    </script>
 </head>
+
 <body>
 
-    <div class="navbar">
-        <div class="logo"><a href="index.html">LOGO</a></div>
-        <div class="nav-links">
-            <a href="index.html">會員</a>
-            <a href="index.html">問題</a>
-            <a href="register.html">註冊</a>
-            <a href="login.html">登入</a>
-        </div>
+<div class="navbar">
+    <div class="logo"><a href="index.html">LOGO</a></div>
+    <div class="nav-links">
+        <a href="index.html">會員</a>
+        <a href="index.html">問題</a>
+        <a href="register.html">註冊</a>
+        <a href="login.html">登入</a>
     </div>
+</div>
 
-    <div class="register-container">
-        <div class="register-box">
-            <h2>會員註冊</h2>
-            <form action="register.php" method="POST">
-                <input type="text" name="name" placeholder="姓名" required />
-                <input type="text" name="person_id" placeholder="身分證字號" required />
-                <input type="password" name="password" placeholder="密碼" required />
-                <input type="submit" value="註冊">
-            </form>
-            <div class="login-link">
-                已有帳號？<a href="login.html">點此登入</a>
+<div class="register-container">
+    <div class="register-box">
+        <h2>會員註冊</h2>
+        <form name="registerForm" action="register.php" method="POST" onsubmit="return finalSubmit()">
+            <input type="text" name="username" placeholder="帳號名稱" required />
+            <input type="email" id="email" name="email" placeholder="Gmail" required />
+            <input type="text" name="name" placeholder="姓名" required />
+            <input type="tel" name="phone" placeholder="電話 (09開頭)" pattern="09\d{8}" required />
+            <input type="date" name="birthday" placeholder="生日" required />
+            <textarea name="address" rows="2" placeholder="地址" required></textarea>
+            <input type="password" name="password" placeholder="密碼" required />
+            <input type="password" name="confirm_password" placeholder="確認密碼" required />
+            <button type="button" id="basic-info-btn" onclick="validateBasicInfo()">下一步</button>
+
+            <!-- 驗證碼區 -->
+            <div id="verification-section" class="hidden">
+                <button type="button" onclick="sendVerificationCode()">發送驗證碼</button>
+                <input type="text" name="email_code" placeholder="輸入驗證碼" required />
+                <input type="submit" value="完成註冊">
             </div>
+        </form>
+        <div class="login-link">
+            已有帳號？<a href="login.html">點此登入</a>
         </div>
     </div>
+</div>
 
 </body>
 </html>
