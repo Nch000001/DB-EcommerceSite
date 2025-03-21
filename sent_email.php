@@ -32,10 +32,10 @@ try {
     $mail->Port = 587;
 
     // Email content
-    $mail->setFrom('your_gmail@gmail.com', 'Your Website');
+    $mail->setFrom('your_gmail@gmail.com', 'Ecommercesite');
     $mail->addAddress($email);
     $mail->isHTML(true);
-    $mail->Subject = 'Ecommercesite';
+    $mail->Subject = 'Ecommercesite Verification Code';
     $mail->Body    = "<h2>您的驗證碼是：<strong>$verification_code</strong></h2><p>請在 5 分鐘內使用。</p>";
 
     $mail->send();

@@ -44,6 +44,7 @@
             flex-direction: column;
             align-items: center;
             margin-top: 80px;
+            /* width: 100%; */
         }
         .login-box {
             background-color: white;
@@ -58,11 +59,14 @@
             color: #1E3A8A;
         }
         .login-box input[type="text"], .login-box input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            width: 90%;           /* 設為 80%，不會太滿 */
+            max-width: 350px;     /* 最大不超過 350px */
+            padding: 14px;
+            margin: 10px auto;    /* 自動左右置中 */
+            display: block;       /* 讓 margin auto 生效 */
             border: 1px solid #CCC;
-            border-radius: 8px;
+            border-radius: 10px;
+            transition: border-color 0.3s ease;
         }
         .login-box input[type="submit"] {
             width: 100%;
@@ -77,6 +81,7 @@
         .login-box input[type="submit"]:hover {
             background-color: #163372;
         }
+
         .login-box .register-link {
             margin-top: 15px;
             text-align: center;
@@ -85,6 +90,16 @@
             color: #1E3A8A;
             text-decoration: none;
         }
+
+        .login-box .reset_password-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .login-box .reset_password-link a {
+            color: #1E3A8A;
+            text-decoration: none;
+        }
+
     </style>
 </head>
 <body>
@@ -103,12 +118,15 @@
         <div class="login-box">
             <h2>會員登入</h2>
             <form action="login.php" method="POST">
-                <input type="text" name="username" placeholder="帳號" required>
+                <input type="text" name="account" placeholder="帳號" required>
                 <input type="password" name="password" placeholder="密碼" required>
                 <input type="submit" value="登入">
             </form>
             <div class="register-link">
                 還沒有帳號？<a href="register.html">點此註冊</a>
+            </div>
+            <div class="reset_password-link">
+                忘記密碼？<a href="reset_password.html">重設密碼</a>
             </div>
         </div>
     </div>
