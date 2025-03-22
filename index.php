@@ -1,17 +1,8 @@
 <?php
-// 1. 設定資料庫連線參數
-$db_host = "localhost";
-$db_user = "root";
-$db_pass = "";
-$db_name = "ecommerce";
 
-// 2. 建立資料庫連線
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+include 'db.php';
+global $conn;
 
-// 3. 檢查連線是否成功
-if ($conn->connect_error) {
-    die("資料庫連線失敗：" . $conn->connect_error);
-}
 
 // 4. 取得廣告資料 (ads) => 輪播用
 $sqlAds = "SELECT * FROM ads";
@@ -117,7 +108,7 @@ $conn->close();
         .hero { position: relative; width: 100%; height: 500px; overflow: hidden; text-align: center; background: #333; color: white; }
         .hero img { width: 100%; height: 100%; object-fit: cover; align-items: center;justify-content: center;}
         .hero img.active { display: block; }
-        .hero .prev, .hero .next {
+        .hero .prev, .hero .next {  
             position: absolute; top: 50%; transform: translateY(-50%);
             background: rgba(0, 0, 0, 0.5); color: white; padding: 10px;
             cursor: pointer; font-size: 24px;
@@ -229,8 +220,8 @@ $conn->close();
         <div class="nav-links">
             <a href="#">會員</a>
             <a href="#">問題</a>
-            <a href="register.html">註冊</a>
-            <a href="login.html">登入</a>
+            <a href="register.php">註冊</a>
+            <a href="login.php">登入</a>
         </div>
     </div>
     
@@ -345,4 +336,5 @@ $conn->close();
     </script>
 </body>
 </html>
+
 

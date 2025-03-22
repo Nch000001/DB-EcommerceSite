@@ -1,20 +1,10 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$db_password = "";
-$dbname = "ecommerce";
-
-// 建立連線
-$conn = new mysqli($servername, $username, $db_password, $dbname);
-
-// 檢查連線
-if ($conn->connect_error) {
-    die("連線失敗: " . $conn->connect_error);
-}
+include 'db.php';
+global $conn;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 取得 user_id
-    $max_id_sql = "SELECT MAX(CAST(SUBSTRING(user_id, 2) AS UNSIGNED)) AS max_id FROM users";
+    $max_id_sql = "SELECT MAX(CAST(SUBSTRING(user_id, 2) AS UNSIGNED)) AS max_id FROM user";
     $result = $conn->query($max_id_sql);
 
     if ($result->num_rows > 0) {
@@ -36,11 +26,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $conn->real_escape_string($_POST['email']);
 
     // 組 SQL
-    $sql = "INSERT INTO users (user_id, account, password, name, birthday, home_address, phone_numbers, email)
+    $sql = "INSERT INTO user (user_id, account, password, name, birthday, home_address, phone_numbers, email)
             VALUES ('$new_id', '$account', '$hashed_password', '$name', '$birthday', '$address', '$phone', '$email')";
 
-    // Debug
-    // echo "SQL 語句：" . $sql . "<br>";
 
     if ($account!=NULL && $conn->query($sql) === TRUE) {
         echo "<script>alert('註冊成功！'); window.location.href='login.php';</script>";
