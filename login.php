@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (password_verify($inputPassword, $hashedPassword) || ($hashedPassword == $inputPassword)) {
             $_SESSION['account'] = $row2['admin_account'];
-            echo "<script>alert('登入成功！'); window.location.href='index.php';</script>";
+            echo "<script>alert('登入成功！'); window.location.href='ecommerce_manage.php';</script>";
         } else {
             echo "<script>alert('密碼錯誤！'); window.history.back();</script>";
         }

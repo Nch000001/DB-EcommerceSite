@@ -259,7 +259,6 @@ if ($resultAd->num_rows > 0) {
         <?php else: ?>
               <span>目前尚無分類</span>
         <?php endif; ?>
-      </li>
     </ul>
 
     <main>
