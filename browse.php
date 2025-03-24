@@ -7,7 +7,7 @@ ini_set('display_errors', 1);
 include 'db.php';
 global $conn;
 
-$categoryQuery = "SELECT category_id,name FROM category";
+$categoryQuery = "SELECT category_id, name FROM category";
 $categoryResult = mysqli_query($conn, $categoryQuery);
 
 $categories = [];
@@ -21,30 +21,31 @@ $category_id = $_GET['category_id'] ?? '';
 $selected_tags = $_GET['tag_id'] ?? [];
 
 // 撈 tag_type 與對應 tag（篩選器用）
-$tag_types = [];
-if ($category_id) {
-    $tag_type_sql = "SELECT tt.tag_type_id, tt.name AS tag_type_name
-                     FROM tag_type tt
-                     JOIN tag_category tc ON tt.tag_type_id = tc.tag_type_id
-                     WHERE tc.category_id = ?";
-    $stmt = $conn->prepare($tag_type_sql);
-    $stmt->bind_param("s", $category_id);
-    $stmt->execute();
-    $tag_type_result = $stmt->get_result();
-    while ($row = $tag_type_result->fetch_assoc()) {
-        $tag_id_sql = "SELECT tag_id, name FROM tag WHERE tag_type_id = ?";
-        $tag_stmt = $conn->prepare($tag_id_sql);
-        $tag_stmt->bind_param("s", $row['tag_type_id']);
-        $tag_stmt->execute();
-        $tag_result = $tag_stmt->get_result();
-        $tags = [];
-        while ($tag = $tag_result->fetch_assoc()) {
-            $tags[] = $tag;
+    $tag_types = [];
+
+    if ($category_id) { 
+        $tag_type_sql = "SELECT tt.tag_type_id, tt.name AS tag_type_name
+                        FROM tag_type tt
+                        JOIN tag_category tc ON tt.tag_type_id = tc.tag_type_id
+                        WHERE tc.category_id = ?";
+        $stmt = $conn->prepare($tag_type_sql);
+        $stmt->bind_param("s", $category_id);
+        $stmt->execute();
+        $tag_type_result = $stmt->get_result();
+        while ($row = $tag_type_result->fetch_assoc()) {
+            $tag_id_sql = "SELECT tag_id, name FROM tag WHERE tag_type_id = ?";
+            $tag_stmt = $conn->prepare($tag_id_sql);
+            $tag_stmt->bind_param("s", $row['tag_type_id']);
+            $tag_stmt->execute();
+            $tag_result = $tag_stmt->get_result();
+            $tags = [];
+            while ($tag = $tag_result->fetch_assoc()) {
+                $tags[] = $tag;
+            }
+            $row['tags'] = $tags;
+            $tag_types[] = $row;
         }
-        $row['tags'] = $tags;
-        $tag_types[] = $row;
     }
-}
 
     if (!empty($selected_tags)) {
         $product_sql = "
@@ -93,33 +94,43 @@ if ($category_id) {
     }
 
     body { font-family: 'Noto Sans TC', sans-serif; margin: 0; background-color: #f5f5f5; }
-    .navbar {  position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 60px;
-        background-color: #1e3a8a; /* 深藍色 */
-        display: flex; /* 使用 flexbox */
-        align-items: center; /* 垂直置中 */
-        justify-content: center;
-        padding: 0px; /* 添加內距 */
-        z-index: 1000;
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #1E3A8A;
+      padding: 15px 20px;
+      color: white;
     }
-    .navbar .logo {
-        font-size: 24px;
-        font-weight: bold;
-        color: white;
-        text-decoration: none;
-        margin-right: 0px; 
+    .navbar .logo a {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
     }
-    .navbar .logo a { font-size: 24px; font-weight: bold; color: white; text-decoration: none; }
-    .nav-links { display: flex; gap: 10px; }
-    .nav-links a { background-color: #D4AF37; color: white; text-decoration: none; padding: 10px 15px; border-radius: 20px; }
+    .nav-links {
+      display: flex;
+      gap: 10px;
+    }
+    .nav-links a {
+      background-color: #D4AF37;
+      color: white;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 20px;
+    }
     .search-bar { flex-grow: 1; display: flex; justify-content: center; }
     .search-bar input { width: 100%; padding: 8px 12PX; border: 1px solid #CCC; border-radius: 5px; max-width: 600px; font-size: 16px;}
     
     .category-bar {
-        margin-top: 60px;
+        margin-top: 70px;
         display: flex;
         justify-content: center;
         background-color: #DDD;

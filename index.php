@@ -22,11 +22,8 @@ if($categoryResult && mysqli_num_rows($categoryResult) > 0){
 
 // (3) 隨機取得商品 (Products) 資料
 // 假設您的 products 表結構包含 product_id、product_name、product_price、image_path 等欄位
-// 這裡示範取 6 筆隨機商品
-$productQuery = "SELECT product_id, product_name, price, image_path
-                 FROM product
-                 ORDER BY RAND()
-                 LIMIT 6";
+$productQuery = "SELECT product_id, product_name, price, image_path FROM product
+                 WHERE  is_active = 1 ORDER BY RAND() ";
 $productResult = mysqli_query($conn, $productQuery);
 
 $sqlAd = "SELECT * FROM ad";
@@ -54,29 +51,37 @@ if ($resultAd->num_rows > 0) {
         
         body { font-family: 'Noto Sans TC', sans-serif; margin: 0; padding-top: 60px; background-color: #F5F5F5; } 
 
-        .navbar {  position: fixed;
+        .navbar {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 60px;
-            background-color: #1e3a8a; /* 深藍色 */
-            display: flex; /* 使用 flexbox */
-            align-items: center; /* 垂直置中 */
-            justify-content: center;
-            padding: 0px; /* 添加內距 */
-            z-index: 1000;
+            z-index: 999;
+            
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1E3A8A;
+            padding: 15px 20px;
+            color: white;
         }
-        .navbar .logo {
+        .navbar .logo a {
             font-size: 24px;
             font-weight: bold;
             color: white;
             text-decoration: none;
-            margin-right: 0px; 
         }
-
-        .navbar .logo a { font-size: 24px; font-weight: bold; color: white; text-decoration: none; }
-        .nav-links { display: flex; gap: 10px; }
-        .nav-links a { background-color: #D4AF37; color: white; text-decoration: none; padding: 10px 15px; border-radius: 20px; }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-links a {
+            background-color: #D4AF37;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
         .search-bar { flex-grow: 1; display: flex; justify-content: center; }
         .search-bar input { width: 100%; padding: 8px 12PX; border: 1px solid #CCC; border-radius: 5px; max-width: 600px; font-size: 16px;}
 
@@ -236,8 +241,7 @@ if ($resultAd->num_rows > 0) {
                 <img
                     src="<?php echo htmlspecialchars($ad['image_path']); ?>" 
                     class="<?php echo ($index === 0) ? 'active' : ''; ?>" 
-                    alt="廣告"
-                >
+                    alt="廣告">
               </a>
             <?php endforeach; ?>
         <?php else: ?>
