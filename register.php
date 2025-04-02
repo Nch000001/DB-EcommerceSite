@@ -49,43 +49,61 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>會員註冊</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
 
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #F0F4F8;
-        }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #1E3A8A;
-            padding: 15px 20px;
-            color: white;
-        }
-        .navbar .logo a {
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
-        }
-        .nav-links {
-            display: flex;
-            gap: 10px;
-        }
-        .nav-links a {
-            background-color: #D4AF37;
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 30px;
-            transition: background-color 0.3s ease;
-        }
-        .nav-links a:hover {
-            background-color: #b88a20;
-        }
+    * { box-sizing: border-box; }
+
+    html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    main {
+        flex: 1; /* 🔥 主內容自動撐開，其餘交給 header/footer */
+    }
+
+    body { font-family: 'Noto Sans TC', sans-serif; margin: 0; background-color: #f5f5f5; }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #1E3A8A;
+      padding: 15px 20px;
+      color: white;
+    }
+    .navbar .logo a {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 10px;
+    }
+    .nav-links a {
+      background-color: #D4AF37;
+      color: white;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 20px;
+    }
+    
+    .search-bar { flex-grow: 1; display: flex; justify-content: center; }
+    .search-bar input { width: 100%; padding: 8px 12PX; border: 1px solid #CCC; border-radius: 5px; max-width: 600px; font-size: 16px;}
+    .hidden {
+            display: none;
+    }
+
 
         .register-container {
             display: flex;
@@ -290,16 +308,20 @@ $conn->close();
 
 <body>
 
-<div class="navbar">
-    <div class="logo"><a href="index.php">LOGO</a></div>
-    <div class="nav-links">
-        <a href="index.php">會員</a>
-        <a href="index.php">問題</a>
-        <a href="register.php">註冊</a>
-        <a href="login.php">登入</a>
-    </div>
-</div>
+    <header class="navbar">
+        <div class="logo"><a href="index.php">LOGO</a></div>  
+        <div class="search-bar"><div class="hidden"><input type="text" placeholder="搜尋產品..."></div></div>   <!-- 搜尋欄  算法待定 -->
 
+        <div class="nav-links">
+            <a href="#">會員</a>
+            <a href="#">問題</a>
+            <a href="register.php">註冊</a>
+            <a href="login.php">登入</a>
+        </div>
+
+    </header>
+
+    <br><br><br>
 <div class="register-container">
     <div class="register-box">
         <h2>會員註冊</h2>

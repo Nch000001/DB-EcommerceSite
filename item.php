@@ -51,6 +51,18 @@ $otherResult = $stmt2->get_result();
   <meta charset="UTF-8">
   <title><?php echo htmlspecialchars($prod['product_name']); ?> - 商品頁面</title>
   <style>
+    * { box-sizing: border-box; }
+
+    html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    main {
+        flex: 1;
+    }
 
     body {
       padding: 0;
@@ -93,6 +105,27 @@ $otherResult = $stmt2->get_result();
     .search-bar { flex-grow: 1; display: flex; justify-content: center; }
     .search-bar input { width: 100%; padding: 8px 12PX; border: 1px solid #CCC; border-radius: 5px; max-width: 600px; font-size: 16px;}
     
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+    }
+
+    .button.primary {
+      background-color: #1e3a8a;
+      color: white;
+    }
+
+    .button.gray {
+      background-color: #ccc;
+      color: black;
+    }
+
     .category-bar {
         margin-top: 70px;
         display: flex;
@@ -125,11 +158,13 @@ $otherResult = $stmt2->get_result();
     .container { max-width: 1300px; margin: auto; padding: 20px; padding-top: 60px;}
     .hero-ad {
       display: flex;
-      height: 320px;
+      height: 320px; /* ✅ 硬性限制整體高度 */
       background: #fff;
       margin-top: 60px;
-      max-width: 1200px;  /* 限制整體最大寬度 */
+      max-width: 1200px;
       margin-inline: auto;
+      border-radius: 8px;
+      overflow: hidden;
     }
 
     .hero-left {
@@ -138,54 +173,56 @@ $otherResult = $stmt2->get_result();
       align-items: center;
       justify-content: center;
       padding: 20px;
-      max-width: 600px; /* 🔥 圖片區最大寬度限制 */
+      max-width: 600px;
     }
 
     .hero-left img {
       width: 100%;
       height: auto;
-      max-height: 300px; /* 🔥 讓圖片在區塊內保持比例縮放 */
+      max-height: 300px;
       object-fit: contain;
     }
 
     .hero-right {
       flex: 1;
+      max-width: 600px;
       padding: 20px;
-      font-size: 16px;
-      line-height: 1.8;
-      border-left: 2px solid #ccc;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      max-width: 600px;
+      border-left: 2px solid #ccc;
+      height: 100%; /* ✅ 讓內部內容剛好塞滿 320px 高度 */
+      box-sizing: border-box;
+    }
+
+    .hero-right h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .hero-right-content {
+      flex: 1;
+      overflow-y: auto; /* ✅ 多餘文字會滾動 */
+      padding-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .hero-right .buttons {
+      display: flex;
+      justify-content: space-between; /* 將價格與按鈕區域分散兩邊 */
+      align-items: center;
+      margin-top: auto;
     }
 
     .hero-right .price {
       color: #d72638;
-      font-size: 20px;
+      font-size: 25px;
       font-weight: bold;
-      margin: 15px 0;
-    }
-    
-    .button {
-      display: inline-block;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      text-decoration: none;
-      text-align: center;
-      cursor: pointer;
-      border: none;
+      margin: 0;
     }
 
-    .button.primary {
-      background-color: #1e3a8a;
-      color: white;
-    }
-
-    .button.gray {
-      background-color: #ccc;
-      color: black;
+    .hero-right .btn-group {
+      display: flex;
+      gap: 10px;
     }
 
     .product-detail-box {
@@ -310,12 +347,16 @@ $otherResult = $stmt2->get_result();
       <img src="<?php echo htmlspecialchars($prod['image_path']); ?>" alt="商品圖片">
     </div>
     <div class="hero-right">
-      <h2><?php echo htmlspecialchars($prod['product_name']); ?></h2>
-      <?php echo nl2br(htmlspecialchars($prod['short_description'])); ?>
-      <div class="price">NT$<?php echo number_format($prod['price']); ?></div>
+      <div class="hero-right-content">
+        <h2><?php echo htmlspecialchars($prod['product_name']); ?></h2>
+        <?php echo nl2br(htmlspecialchars($prod['short_description'])); ?>
+      </div>
       <div class="buttons">
-        <a href="#" class="button gray">加入購物車</a>
-        <a href="#" class="button primary">立即購買</a>
+        <div class="price">NT$<?php echo number_format($prod['price']); ?></div>
+        <div class="btn-group">
+          <a href="#" class="button gray">加入購物車</a>
+          <a href="cart.php?user_id=<?php echo $user_id;?>" class="button primary">立即購買</a>
+        </div>
       </div>
     </div>
   </div>
@@ -323,7 +364,6 @@ $otherResult = $stmt2->get_result();
 
   <!-- 商品詳情 -->
   <div class="product-detail-box">
-    <h2><?php echo htmlspecialchars($prod['product_name']); ?></h2>
     <div id="descBox" class="description">
       <?php echo nl2br(htmlspecialchars($prod['detail_description'])); ?>
     </div>
