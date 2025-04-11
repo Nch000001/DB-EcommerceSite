@@ -4,8 +4,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // 資料庫連線
-include 'db.php';
-global $conn;
+require_once './lib/db.php';
+$conn = getDBConnection();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $account = $conn->real_escape_string($_POST['account']);
@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (password_verify($inputPassword, $hashedPassword) || ($hashedPassword == $inputPassword)) {
             $_SESSION['account'] = $row2['admin_account'];
-            echo "<script>alert('登入成功！'); window.location.href='ecommerce_manage.php';</script>";
+            echo "<script>alert('登入成功！'); window.location.href='./admin/ecommerce_admin.php';</script>";
         } else {
             echo "<script>alert('密碼錯誤！'); window.history.back();</script>";
         }
@@ -178,6 +178,11 @@ $conn->close();
             text-decoration: none;
         }
 
+    .footer {
+        background-color: #333; color: white; text-align: center;
+        padding: 20px; font-size: 14px;
+    }
+
     </style>
 </head>
 <body>
@@ -213,5 +218,6 @@ $conn->close();
         </div>
     </div>
 
+    
 </body>
 </html>

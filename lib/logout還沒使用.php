@@ -5,8 +5,8 @@ session_start();
 $isAdmin = isset($_SESSION['super_user_id']);
 
 if ($isAdmin) {
-    require_once 'lib/db.php';
-    require_once 'lib/login_logger.php';
+    require_once 'db.php';
+    require_once 'login_logger.php';
     $conn = getDBConnection();
     logLoginAction($conn, $_SESSION['super_user_id'], 'logout');
 }

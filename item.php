@@ -3,8 +3,8 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include 'db.php';
-global $conn;
+require_once './lib/db.php';
+$conn = getDBConnection();
 
 $product_id = $_GET['product_id'] ?? null;
 
@@ -243,6 +243,12 @@ $otherResult = $stmt2->get_result();
       max-height: none;
     }
 
+    .product-detail-box .description img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
     .toggle-btn {
       margin-top: 10px;
       color: #1e3a8a;
@@ -365,7 +371,7 @@ $otherResult = $stmt2->get_result();
   <!-- 商品詳情 -->
   <div class="product-detail-box">
     <div id="descBox" class="description">
-      <?php echo nl2br(htmlspecialchars($prod['detail_description'])); ?>
+      <img src="<?php echo htmlspecialchars($prod['detail_description']); ?>" alt="商品圖片">
     </div>
     <div id="toggleBtn" class="toggle-btn" onclick="toggleDescription()">查看更多</div>
   </div>

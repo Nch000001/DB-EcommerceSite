@@ -1,75 +1,28 @@
 <?php
-
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include 'db.php';
-global $conn;
+require_once './lib/db.php';
+$conn = getDBConnection();
 
-$categoryQuery = "SELECT category_id, name FROM category";
-$categoryResult = mysqli_query($conn, $categoryQuery);
-
-$categories = [];
-if($categoryResult && mysqli_num_rows($categoryResult) > 0){
-  while($row = mysqli_fetch_assoc($categoryResult)){
-    $categories[] = $row;
-  }
-}
+require_once './lib/product_filter.php';
 
 $category_id = $_GET['category_id'] ?? '';
 $selected_tags = $_GET['tag_id'] ?? [];
 
-// 撈 tag_type 與對應 tag（篩選器用）
-    $tag_types = [];
+[$tag_types, $product_result] = getProductFilterResults($conn, $category_id, $selected_tags);
 
-    if ($category_id) { 
-        $tag_type_sql = "SELECT tt.tag_type_id, tt.name AS tag_type_name
-                        FROM tag_type tt
-                        JOIN tag_category tc ON tt.tag_type_id = tc.tag_type_id
-                        WHERE tc.category_id = ?";
-        $stmt = $conn->prepare($tag_type_sql);
-        $stmt->bind_param("s", $category_id);
-        $stmt->execute();
-        $tag_type_result = $stmt->get_result();
-        while ($row = $tag_type_result->fetch_assoc()) {
-            $tag_id_sql = "SELECT tag_id, name FROM tag WHERE tag_type_id = ?";
-            $tag_stmt = $conn->prepare($tag_id_sql);
-            $tag_stmt->bind_param("s", $row['tag_type_id']);
-            $tag_stmt->execute();
-            $tag_result = $tag_stmt->get_result();
-            $tags = [];
-            while ($tag = $tag_result->fetch_assoc()) {
-                $tags[] = $tag;
-            }
-            $row['tags'] = $tags;
-            $tag_types[] = $row;
-        }
+// 撈分類列用的
+$categoryQuery = "SELECT category_id, name FROM category";
+$categoryResult = mysqli_query($conn, $categoryQuery);
+
+$categories = [];
+if ($categoryResult && mysqli_num_rows($categoryResult) > 0) {
+    while ($row = mysqli_fetch_assoc($categoryResult)) {
+        $categories[] = $row;
     }
-
-    if (!empty($selected_tags)) {
-        $product_sql = "
-        SELECT p.*
-        FROM product p
-        JOIN product_tag pt ON p.product_id = pt.product_id
-        WHERE p.category_id = ?
-        AND pt.tag_id IN (" . implode(',', array_fill(0, count($selected_tags), '?')) . ")
-        GROUP BY p.product_id
-        HAVING COUNT(DISTINCT pt.tag_id) = ?
-        ";
-
-        $params = array_merge([$category_id], $selected_tags, [count($selected_tags)]);
-        $types = str_repeat("s", count($selected_tags) + 1) . "i";
-    } else {
-        $product_sql = "SELECT * FROM product WHERE category_id = ?";
-        $params = [$category_id];
-        $types = "s";
-    }
-
-    $stmt = $conn->prepare($product_sql);
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $product_result = $stmt->get_result();
+}
 
 ?>
 
@@ -162,39 +115,61 @@ $selected_tags = $_GET['tag_id'] ?? [];
 
     .container { max-width: 1300px; margin: auto; padding: 20px; padding-top: 60px;}
 
-    
-
-    /* 篩選區 */
     .filter-box {
         background: #fff;
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 30px;
+        position: relative; /* 為右下角按鈕做定位 */
     }
+
+    /* 每列顯示三個 tag_type 群組 */
+    .tag-type-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    /* 每一組 tag_type（觸發結構、連接方式...） */
     .filter-group {
-        margin-bottom: 15px;
-    }
-    .filter-title {
-        font-weight: bold;
         margin-bottom: 10px;
     }
+
+    /* tag_type 標題 */
+    .filter-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    /* 每組內的 tag 標籤 */
     .filter-options {
         display: flex;
         flex-wrap: wrap;
-        gap: 15px;
+        gap: 10px;
     }
+
+    /* 單一標籤樣式 */
     .filter-options label {
         background: #f0f0f0;
-        padding: 5px 10px;
+        padding: 6px 12px;
         border-radius: 15px;
         cursor: pointer;
         display: flex;
         align-items: center;
+        font-size: 14px;
     }
+
     .filter-options input {
         margin-right: 5px;
     }
 
+    /* ✨ 按鈕定位到右下角 */
+    .filter-submit {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+    }
+    
     /* 商品區 */
     .product-grid {
         display: grid;
@@ -280,21 +255,24 @@ $selected_tags = $_GET['tag_id'] ?? [];
         <form method="get" class="filter-box">
             <input type="hidden" name="category_id" value="<?php echo htmlspecialchars($category_id); ?>">
 
-            <?php foreach ($tag_types as $type): ?>
-                <div class="filter-group">
-                    <div class="filter-title"><?php echo htmlspecialchars($type['tag_type_name']); ?></div> <!--tag_type = 觸發結構, 顏色-->
-                        <div class="filter-options">
-                            <?php foreach ($type['tags'] as $tag): ?>
-                                <label>
-                                    <input type="checkbox" name="tag_id[]" value="<?php echo $tag['tag_id']; ?>"
-                                        <?php echo in_array($tag['tag_id'], $selected_tags) ? 'checked' : ''; ?>>
-                                    <?php echo htmlspecialchars($tag['name']); ?>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
+            <div class="tag-type-group">
+                <?php foreach ($tag_types as $type): ?>
+                    <div>
+                    <strong><?php echo htmlspecialchars($type['tag_type_name']); ?></strong>
+                    <div class="filter-options">
+                        <?php foreach ($type['tags'] as $tag): ?>
+                        <label>
+                            <input type="checkbox" name="tag_id[]" value="<?php echo $tag['tag_id']; ?>"
+                            <?php echo in_array($tag['tag_id'], $selected_tags) ? 'checked' : ''; ?>>
+                            <?php echo htmlspecialchars($tag['name']); ?>
+                        </label>
+                        <?php endforeach; ?>
                     </div>
-            <?php endforeach; ?>
-            <button type="submit">套用篩選</button>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <button type="submit" class="btn btn-primary filter-submit">套用篩選</button>
         </form>
 
         <div class="product-grid">

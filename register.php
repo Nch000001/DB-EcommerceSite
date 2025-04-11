@@ -1,6 +1,6 @@
 <?php
-include 'db.php';
-global $conn;
+require_once './lib/db.php';
+$conn = getDBConnection();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // 取得 user_id

@@ -2,8 +2,8 @@
 header('Content-Type: application/json');
 
 // 資料庫連線設定
-include 'db.php';
-global $conn;
+require_once 'lib/db.php';
+$conn = getDBConnection();
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $conn->query($sql);
 
     $sql2 = "SELECT * FROM super_admin WHERE admin_account='$account'";
-    $result2 = $conn->query($sql);
+    $result2 = $conn->query($sql2);
 
     if ($result->num_rows + $result2->num_rows > 0) {
         echo json_encode(["success" => false, "error" => "帳號、Email 或電話已存在"]);

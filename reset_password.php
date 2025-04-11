@@ -4,8 +4,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // 資料庫連線
-include 'db.php';
-global $conn;
+require_once './lib/db.php';
+$conn = getDBConnection();
 
 
 // 處理表單送來的資料
