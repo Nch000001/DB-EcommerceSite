@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 
 require_once './lib/db.php';
 $conn = getDBConnection();
-
+ 
 // (2) 取得大類別 (Category) 資料
 // 假設您的 categories 表結構至少包含 category_id、name
 $categoryQuery = "SELECT category_id,name FROM category";
