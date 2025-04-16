@@ -26,7 +26,7 @@ $productQuery = "SELECT product_id, product_name, price, image_path FROM product
                  WHERE  is_active = 1 ORDER BY RAND() ";
 $productResult = mysqli_query($conn, $productQuery);
 
-$sqlAd = "SELECT * FROM ad";
+$sqlAd = "SELECT * FROM ad WHERE is_active = 1 AND current_timestamp() BETWEEN start_time AND end_time";
 $resultAd = $conn->query($sqlAd);
 
 $adData = [];
@@ -36,6 +36,9 @@ if ($resultAd->num_rows > 0) {
     }
 }
 
+// echo '<pre>';
+// print_r($adData);
+// echo '</pre>';
 ?>
 
 
@@ -99,8 +102,8 @@ if ($resultAd->num_rows > 0) {
 
         /* Hero Carousel */
         .hero { position: relative; width: 100%; height: 500px; overflow: hidden; text-align: center; background: #333; color: white; }
-        .hero img { width: 100%; height: 100%; object-fit: cover; align-items: center;justify-content: center;}
-        .hero img.active { display: block; }
+        .hero img { width: 100%; height: 100%; object-fit: cover; align-items: center;justify-content: center;display: none;}
+        .hero img.active {display: block;}
         .hero .prev, .hero .next {  
             position: absolute; top: 50%; transform: translateY(-50%);
             background: rgba(0, 0, 0, 0.5); color: white; padding: 10px;
@@ -312,13 +315,47 @@ if ($resultAd->num_rows > 0) {
 
     <div class="footer">
         <div class="contact">
-            <span>電話: 123-456-789</span>　
-            <span>Email: example@mail.com</span>　
-            <span>地址: 台北市XX區XX路</span>
+            <span>電話: 0900000000</span>　
+            <span>Email: dbecommercesite@gmail.com</span>　
+            <span>地址: 臺灣臺中市西屯區文華路100號</span>
         </div>
     </div>
 
+
+
+<script>
+    let currentIndex = 0;
+
+    function updateSlides(direction) {
+        const slides = document.querySelectorAll('.hero img');
+        if (slides.length === 0) return;
+
+        // 移除所有 active
+        slides[currentIndex].classList.remove('active');
+
+        // 更新 index
+        if (direction === 'next') {
+            currentIndex = (currentIndex + 1) % slides.length;
+        } else if (direction === 'prev') {
+            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        }
+
+        // 加上 active
+        slides[currentIndex].classList.add('active');
+    }
+
+    function nextSlide() {
+        updateSlides('next');
+    }
+
+    function prevSlide() {
+        updateSlides('prev');
+    }
+</script>
+
 </body>
+
+
 </html>
 
 <?php

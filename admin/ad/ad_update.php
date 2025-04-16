@@ -41,21 +41,27 @@ if ((int)$is_active !== (int)$original['is_active']) {
     $updates[] = "is_active = $is_active";
     $log_changes[] = "狀態：{$original['is_active']} → $is_active";
 }
-if ($start_time !== $original['start_time']) {
-    $updates[] = "start_time = '$start_time'";
-    $log_changes[] = "開始：{$original['start_time']} → $start_time";
-}
+
 $original_end = $original['end_time'] ?? null;
-if ($end_time !== $original_end) {
-    if ($end_time !== null) {
-        $updates[] = "end_time = '$end_time'";
-        $log_changes[] = "結束：{$original_end} → $end_time";
-    } else {
-        $updates[] = "end_time = NULL";
-        $log_changes[] = "結束：{$original_end} → NULL";
-    }
+
+// 統一格式（假設你輸入的是 '2025-04-17T00:31'）
+if (!empty($end_time)) {
+    $end_time_normalized = date('Y-m-d H:i', strtotime($end_time));
+} else {
+    $end_time_normalized = null;
 }
 
+$original_end_normalized = !empty($original_end) ? date('Y-m-d H:i', strtotime($original_end)) : null;
+
+if ($end_time_normalized !== $original_end_normalized) {
+    if ($end_time_normalized !== null) {
+        $updates[] = "end_time = '$end_time_normalized'";
+        $log_changes[] = "結束：{$original_end_normalized} → $end_time_normalized";
+    } else {
+        $updates[] = "end_time = NULL";
+        $log_changes[] = "結束：{$original_end_normalized} → NULL";
+    }
+}
 
 // 紀錄log : 變更才更新
 if (!empty($updates)) {
