@@ -18,7 +18,7 @@ if($categoryResult && mysqli_num_rows($categoryResult) > 0){
     $categories[] = $row;
   }
 }
-
+// 87878
 
 // (3) 隨機取得商品 (Products) 資料
 // 假設您的 products 表結構包含 product_id、product_name、product_price、image_path 等欄位
