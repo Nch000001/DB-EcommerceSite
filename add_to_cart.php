@@ -13,6 +13,7 @@ if (!isset($_GET['product_id'])) {
 }
 
 $product_id = $_GET['product_id'];
+$action = $_GET['active'] ?? 'buy';
 
 // 如果尚未登入，導向登入頁，並記錄欲加入購物車的商品
 if (!isset($_SESSION['user_id'])) {
@@ -32,7 +33,7 @@ $stmtStock->execute();
 $resultStock = $stmtStock->get_result();
 
 if ($resultStock->num_rows === 0) {
-    echo "<script>alert('查無此商品'); window.history.back();</script>";
+    echo "<script>alert('查無此商品'); window.location.href='index.php';</script>";
     exit();
 }
 
@@ -55,7 +56,11 @@ if ($result->num_rows > 0) {
     $newQty = $rowCart['quantity'] + 1;
 
     if ($newQty > $rowStock['stock_quantity']) {
-        echo "<script>alert('超過庫存數量，無法加入更多'); window.location.href='cart.php';</script>";
+        if ($action === 'buy') {
+            echo "<script>alert('該商品已在購物車中，數量已達庫存上限'); window.location.href='cart.php';</script>";
+        } else {
+            echo "<script>alert('該商品已在購物車中，數量已達庫存上限'); window.history.back();</script>";
+        }
         exit();
     }
 
@@ -64,12 +69,6 @@ if ($result->num_rows > 0) {
     $stmtUpdate->bind_param("ss", $user_id, $product_id);
     $stmtUpdate->execute();
 } else {
-    // ✅ 不存在，新增前檢查庫存是否足夠
-    if ($quantity > $rowStock['stock_quantity']) {
-        echo "<script>alert('庫存不足'); window.history.back();</script>";
-        exit();
-    }
-
     $sqlInsert = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
     $stmtInsert = $conn->prepare($sqlInsert);
     $stmtInsert->bind_param("ssi", $user_id, $product_id, $quantity);
@@ -77,6 +76,10 @@ if ($result->num_rows > 0) {
 }
 
 // ✅ 成功加入購物車，導向購物車頁面
-header("Location: cart.php");
+if ($action === 'buy') {
+    echo "<script>window.location.href='cart.php';</script>";
+} else {
+    echo "<script>alert('已加入購物車'); window.history.back();</script>";
+}
 exit();
 ?>

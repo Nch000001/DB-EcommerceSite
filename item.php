@@ -43,6 +43,18 @@ $stmt2 = $conn->prepare($otherProductQuery);
 $stmt2->bind_param("s", $product_id);
 $stmt2->execute();
 $otherResult = $stmt2->get_result();
+
+
+$cartCount = 0;
+if (isset($_SESSION['user_id'])) {
+    $uid = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT SUM(quantity) FROM cart WHERE user_id = ?");
+    $stmt->bind_param("s", $uid);
+    $stmt->execute();
+    $stmt->bind_result($cartCount);
+    $stmt->fetch();
+    $stmt->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -315,6 +327,26 @@ $otherResult = $stmt2->get_result();
         padding: 20px; font-size: 14px;
     }
 
+
+    /* 購物車 */
+    .floating-cart-btn {
+        position: fixed;
+        top: 600px;         /* 與 navbar 有距離 */
+        right: 20px;
+        background-color: #D4AF37;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        z-index: 1000;
+        transition: background-color 0.3s ease;
+    }
+    .floating-cart-btn:hover {
+        background-color: #b18f27;
+    }
+
   </style>
 </head>
 <body>
@@ -327,8 +359,13 @@ $otherResult = $stmt2->get_result();
         <div class="nav-links">
             <a href="#">會員</a>
             <a href="#">問題</a>
-            <a href="register.php">註冊</a>
-            <a href="login.php">登入</a>
+
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                <a href="register.php">註冊</a>
+                <a href="login.php">登入</a>
+            <?php else: ?>
+                <a href="logout.php">登出</a>
+            <?php endif; ?>
         </div>
 
     </header>
@@ -360,8 +397,8 @@ $otherResult = $stmt2->get_result();
       <div class="buttons">
         <div class="price">NT$<?php echo number_format($prod['price']); ?></div>
         <div class="btn-group">
-          <a href="#" class="button gray">加入購物車</a>
-          <a href="cart.php?user_id=<?php echo $user_id;?>" class="button primary">立即購買</a>
+          <a href="add_to_cart.php?product_id=<?php echo $product_id; ?>&active=add" class="button gray">加入購物車</a>
+          <a href="add_to_cart.php?product_id=<?php echo $product_id; ?>&active=buy" class="button primary">立即購買</a>
         </div>
       </div>
     </div>
@@ -412,14 +449,21 @@ $otherResult = $stmt2->get_result();
     }
   </script>
 
+
+  <?php if (isset($_SESSION['user_id'])): ?>
+    <a href="cart.php" class="floating-cart-btn">
+        🛒 購物車 (<?php echo $cartCount; ?>)
+    </a>
+  <?php endif; ?>
+
 <!-- 保留原 footer -->
-<div class="footer">
-  <div class="contact">
-    <span>電話: 123-456-789</span>　
-    <span>Email: example@mail.com</span>　
-    <span>地址: 台北市XX區XX路</span>
+  <div class="footer">
+    <div class="contact">
+      <span>電話: 123-456-789</span>　
+      <span>Email: example@mail.com</span>　
+      <span>地址: 台北市XX區XX路</span>
+    </div>
   </div>
-</div>
 
 </body>
 </html>

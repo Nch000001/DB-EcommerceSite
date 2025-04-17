@@ -315,13 +315,13 @@ if (isset($_SESSION['user_id'])) {
             <?php if ($product_result && $product_result->num_rows > 0): ?>
                 <?php while ($product = $product_result->fetch_assoc()): ?>
 
-                    <div class="product-card">
+                    <div class="product-card" onclick="goToProduct('<?php echo $product['product_id']; ?>')">
 
                         <img src="<?php echo htmlspecialchars($product['image_path']); ?>" alt="商品圖片">
                         <h3><?php echo htmlspecialchars($product['product_name']); ?></h3>
 
                         <div class="price">$<?php echo number_format($product['price']); ?></div>
-                        <a href="item.php?product_id=<?php echo $product['product_id']; ?>">立即購買</a>
+                        <a href="add_to_cart.php?product_id=<?php echo urlencode($product['product_id']); ?>">立即購買</a>
                         
                     </div>
                 <?php endwhile; ?>
@@ -345,6 +345,12 @@ if (isset($_SESSION['user_id'])) {
             <span>地址: 407802臺中市西屯區文華路100號</span>
         </div>
     </div>
+
+<script>
+    function goToProduct(productId) {
+        window.location.href = 'item.php?product_id=' + encodeURIComponent(productId);
+    }
+</script>
 
 </body>
 </html>
