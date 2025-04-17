@@ -257,6 +257,7 @@ if (isset($_SESSION['user_id'])) {
             padding: 20px; font-size: 14px;
         }
 
+        /* 購物車 */
         .floating-cart-btn {
             position: fixed;
             top: 600px;         /* 與 navbar 有距離 */
@@ -374,7 +375,7 @@ if (isset($_SESSION['user_id'])) {
         <div class="contact">
             <span>電話: 0900000000</span>　
             <span>Email: dbecommercesite@gmail.com</span>　
-            <span>地址: 臺灣臺中市西屯區文華路100號</span>
+            <span>地址: 407802臺中市西屯區文華路100號</span>
         </div>
     </div>
 

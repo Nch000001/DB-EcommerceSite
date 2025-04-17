@@ -55,7 +55,7 @@ if ($result->num_rows > 0) {
     $newQty = $rowCart['quantity'] + 1;
 
     if ($newQty > $rowStock['stock_quantity']) {
-        echo "<script>alert('超過庫存數量，無法加入更多'); window.history.back();</script>";
+        echo "<script>alert('超過庫存數量，無法加入更多'); window.location.href='cart.php';</script>";
         exit();
     }
 
