@@ -17,7 +17,7 @@ $title = $conn->real_escape_string($_POST['title']);
 $image_path = $conn->real_escape_string($_POST['image_path']);
 $link_url = $conn->real_escape_string($_POST['link_url']);
 $is_active = intval($_POST['is_active']);
-$start_time = $conn->real_escape_string($_POST['start_time']);
+$start_time = !empty($_POST['start_time']) ? $conn->real_escape_string($_POST['start_time']) : null;
 $end_time = !empty($_POST['end_time']) ? $conn->real_escape_string($_POST['end_time']) : null;
 
 // 先撈舊資料
@@ -42,6 +42,31 @@ if ((int)$is_active !== (int)$original['is_active']) {
     $log_changes[] = "狀態：{$original['is_active']} → $is_active";
 }
 
+//start_time
+$original_start = $original['start_time'] ?? null;
+
+// 統一格式（假設你輸入的是 '2025-04-17T00:31'）
+if (!empty($start_time)) {
+    $start_time_normalized = date('Y-m-d H:i', strtotime($start_time));
+} else {
+    $start_time_normalized = null;
+}
+
+$original_start_normalized = !empty($original_start) ? date('Y-m-d H:i', strtotime($original_start)) : null;
+
+if ($start_time_normalized !== $original_start_normalized) {
+    if ($start_time_normalized !== null) {
+        $updates[] = "start_time = '$start_time_normalized'";
+        $log_changes[] = "開始時間：{$original_start_normalized} → $start_time_normalized";
+    } else {
+        $updates[] = "start_time = NULL";
+        $log_changes[] = "開始時間：{$original_start_normalized} → NULL";
+    }
+}
+// Start 紀錄結束;
+
+
+//end_tiime
 $original_end = $original['end_time'] ?? null;
 
 // 統一格式（假設你輸入的是 '2025-04-17T00:31'）
@@ -56,12 +81,14 @@ $original_end_normalized = !empty($original_end) ? date('Y-m-d H:i', strtotime($
 if ($end_time_normalized !== $original_end_normalized) {
     if ($end_time_normalized !== null) {
         $updates[] = "end_time = '$end_time_normalized'";
-        $log_changes[] = "結束：{$original_end_normalized} → $end_time_normalized";
+        $log_changes[] = "結束時間：{$original_end_normalized} → $end_time_normalized";
     } else {
         $updates[] = "end_time = NULL";
-        $log_changes[] = "結束：{$original_end_normalized} → NULL";
+        $log_changes[] = "結束時間：{$original_end_normalized} → NULL";
     }
 }
+// End 紀錄結束;
+
 
 // 紀錄log : 變更才更新
 if (!empty($updates)) {

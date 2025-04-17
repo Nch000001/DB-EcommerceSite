@@ -78,6 +78,7 @@ $ads = $stmt->get_result();
       <select name="is_active" id="is_active" class="form-select">
         <option value="1" <?= $is_active === 1 ? 'selected' : '' ?>>啟用</option>
         <option value="0" <?= $is_active === 0 ? 'selected' : '' ?>>停用</option>
+        <option value="1" <?= $is_active === 1 ? 'selected' : 'selected' ?>>BOTH</option>
       </select>
     </div>
     <div class="col-md-2">
@@ -103,7 +104,6 @@ $ads = $stmt->get_result();
             <label>連結網址</label>
             <input type="text" class="form-control" name="link_url" value="<?= htmlspecialchars($row['link_url']) ?>" form="update_form_<?= $row['ad_id'] ?>">
           </div>
-
           <div class="col-md-4">
             <label>是否啟用</label>
             <select name="is_active" class="form-select" form="update_form_<?= $row['ad_id'] ?>">
@@ -113,7 +113,10 @@ $ads = $stmt->get_result();
           </div>
           <div class="col-md-4">
             <label>開始時間</label>
-            <input type="text" class="form-control" value="<?= $row['start_time'] ?>" readonly>
+            <input type="datetime-local" class="form-control"
+              name="start_time"
+              value="<?= $row['start_time'] ? date('Y-m-d\TH:i', strtotime($row['start_time'])) : '' ?>"
+              form="update_form_<?= $row['ad_id'] ?>">
           </div>
           <div class="col-md-4">
             <label>結束時間</label>
