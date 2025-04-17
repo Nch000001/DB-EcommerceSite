@@ -36,9 +36,16 @@ if ($resultAd->num_rows > 0) {
     }
 }
 
-// echo '<pre>';
-// print_r($adData);
-// echo '</pre>';
+$cartCount = 0;
+if (isset($_SESSION['user_id'])) {
+    $uid = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT SUM(quantity) FROM cart WHERE user_id = ?");
+    $stmt->bind_param("s", $uid);
+    $stmt->execute();
+    $stmt->bind_result($cartCount);
+    $stmt->fetch();
+    $stmt->close();
+}
 ?>
 
 
@@ -225,11 +232,47 @@ if ($resultAd->num_rows > 0) {
             background-color: #16327a;
         }
 
+        .product-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .product-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
 
         
         .footer {
             background-color: #333; color: white; text-align: center;
             padding: 20px; font-size: 14px;
+        }
+
+        .floating-cart-btn {
+            position: fixed;
+            top: 600px;         /* 與 navbar 有距離 */
+            right: 20px;
+            background-color: #D4AF37;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+        .floating-cart-btn:hover {
+            background-color: #b18f27;
         }
 
     </style>
@@ -243,8 +286,13 @@ if ($resultAd->num_rows > 0) {
         <div class="nav-links">
             <a href="#">會員</a>
             <a href="#">問題</a>
-            <a href="register.php">註冊</a>
-            <a href="login.php">登入</a>
+
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                <a href="register.php">註冊</a>
+                <a href="login.php">登入</a>
+            <?php else: ?>
+                <a href="logout.php">登出</a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -261,7 +309,8 @@ if ($resultAd->num_rows > 0) {
             <?php endforeach; ?>
         <?php else: ?>
             <!-- 若沒有廣告資料，可放一張預設圖 -->
-            <img src="img/default_ad.jpg" class="active" alt="預設廣告">
+            <img src="img/default_ad.jpg" class="active" alt="預設廣告"
+                style="width: 500px; height: auto; display: block; margin: 0 auto;">
         <?php endif; ?>
         <div class="next" onclick="nextSlide()">〉</div>
     </div>
@@ -284,7 +333,7 @@ if ($resultAd->num_rows > 0) {
     <section class="product">
         <?php if ($productResult && mysqli_num_rows($productResult) > 0): ?>
             <?php while($prod = mysqli_fetch_assoc($productResult)): ?>
-                <div class="product-card">
+                <div class="product-card" onclick="goToProduct('<?php echo $prod['product_id']; ?>')">
                     <!-- 商品圖片 -->
                     <div class="product-image">
                         <img src="<?php echo htmlspecialchars($prod['image_path']); ?>" alt="商品圖片">
@@ -301,16 +350,24 @@ if ($resultAd->num_rows > 0) {
                     </div>
 
                     <!-- 購買按鈕 -->
-                    <a href="item.php?product_id=<?php echo $prod['product_id']; ?>">
-                        <button>立即購買</button>
+                    <a href="add_to_cart.php?product_id=<?php echo urlencode($prod['product_id']); ?>">
+                            <button>立即購買</button>
                     </a>
                 </div>
+                
             <?php endwhile; ?>
         <?php else: ?>
             <p>目前沒有商品。</p>
         <?php endif; ?>
     </section>
     </main>
+
+
+    <?php if (isset($_SESSION['user_id'])): ?>
+    <a href="cart.php" class="floating-cart-btn">
+        🛒 購物車 (<?php echo $cartCount; ?>)
+    </a>
+    <?php endif; ?>
 
 
     <div class="footer">
@@ -320,8 +377,6 @@ if ($resultAd->num_rows > 0) {
             <span>地址: 臺灣臺中市西屯區文華路100號</span>
         </div>
     </div>
-
-
 
 <script>
     let currentIndex = 0;
@@ -350,6 +405,10 @@ if ($resultAd->num_rows > 0) {
 
     function prevSlide() {
         updateSlides('prev');
+    }
+
+    function goToProduct(productId) {
+        window.location.href = 'item.php?product_id=' + encodeURIComponent(productId);
     }
 </script>
 
