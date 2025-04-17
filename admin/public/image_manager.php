@@ -23,7 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['filename'])) {
 </head>
 <body class="container mt-4">
 
-  <h2 class="mb-4">🖼 圖片管理（img 資料夾）</h2>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-4">🖼 圖片管理（img 資料夾）</h2>
+    <a href="../ecommerce_admin.php" class="btn btn-secondary">返回</a>
+  </div>
 
   <div class="row row-cols-1 row-cols-md-3 g-4">
     <?php foreach ($files as $file): ?>

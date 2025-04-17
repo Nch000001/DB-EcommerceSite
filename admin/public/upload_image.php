@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <input type="file" name="images[]" multiple accept="image/*" required>
     <button type="submit">上傳</button>
+    <button type="submit"> <a href="../ecommerce_admin.php">返回</a> </button>
   </form>
 </body>
 </html>
