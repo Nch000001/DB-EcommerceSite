@@ -69,6 +69,12 @@ while ($row = $result->fetch_assoc()) {
         .floating-summary button { margin-top: 15px; width: 100%; padding: 12px; font-size: 16px; border: none; border-radius: 8px; background: linear-gradient(to right, #4CAF50, #45A049); color: white; cursor: pointer; transition: 0.3s; }
         .floating-summary button:hover { background: linear-gradient(to right, #45A049, #4CAF50); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .total-price { font-size: 24px; font-weight: bold; color: #4CAF50; margin-top: 8px; }
+        .floating-summary button.active {
+            background: linear-gradient(to right, #f44336, #e53935); /* 紅色漸層 */
+            color: white;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
     </style>
 </head>
 <body>
@@ -78,7 +84,7 @@ while ($row = $result->fetch_assoc()) {
         <div>總金額</div>
         <div class="total-price">$<?php echo $total; ?></div>
     </div>
-    <button type="button" onclick="document.getElementById('cartForm').submit()">✅ 確認購買</button>
+    <button type="button" id="checkoutBtn" onclick="tryCheckout()">✅ 確認購買</button>
 </div>
 
 <div class="cart-container">
@@ -150,6 +156,17 @@ function toggleSelectAll() {
     updateTotal();
 }
 
+function tryCheckout() {
+    const totalText = document.querySelector('#totalDisplay .total-price').innerText;
+    const total = parseFloat(totalText.replace('$', ''));
+
+    if (total > 0) {
+        document.getElementById('cartForm').submit();
+    } else {
+        alert('請至少選擇一項商品才能結帳！');
+    }
+}
+
 
 function updateTotal() {
     let total = 0;
@@ -169,6 +186,18 @@ function updateTotal() {
     });
 
     document.querySelector('#totalDisplay .total-price').innerText = '$' + total;
+
+    // ✅ 修改按鈕行為與文字
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (total > 0) {
+        checkoutBtn.disabled = false;
+        checkoutBtn.innerText = '✅ 確認購買';
+        checkoutBtn.classList.remove('active'); // ❌ 移除紅色
+    } else {
+        checkoutBtn.disabled = true;
+        checkoutBtn.innerText = '請選擇商品';
+        checkoutBtn.classList.add('active'); // ✅ 加紅色 + 動畫
+    }
 }
 
 function changeQty(button, delta) {
