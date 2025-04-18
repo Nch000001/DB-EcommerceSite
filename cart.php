@@ -93,18 +93,28 @@ while ($row = $result->fetch_assoc()) {
 
             <?php foreach ($cartItems as $item): ?>
                 <div class="cart-item product-box" data-subtotal="<?php echo $item['subtotal']; ?>">
-                    <input type="checkbox" class="product-checkbox" name="selected_products[]" value="<?php echo $item['product_id']; ?>" checked onchange="updateTotal()">
+
+                    <?php if ($item['stock_quantity'] <= 0): ?>
+                        <input type="checkbox" disabled>
+                    <?php else: ?>
+                        <input type="checkbox" class="product-checkbox" name="selected_products[]" value="<?php echo $item['product_id']; ?>" checked onchange="updateTotal()">
+                    <?php endif; ?>
+
                     <img src="<?php echo htmlspecialchars($item['image_path']); ?>" alt="商品圖片">
                     <div class="cart-item-details">
                         <div><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></div>
                         <div class="cart-item-row">
                             <div class="price">單價：$<?php echo $item['price']; ?></div>
+                            <?php if ($item['stock_quantity'] <= 0): ?>
+                                <div style="color: red; font-weight: bold;">⚠️ 物品缺貨中</div>
+                            <?php else: ?>
                             <div class="quantity-control">
                                 <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
                                 <input type="number" class="qty-input" value="<?php echo $item['quantity']; ?>" min="0" max="<?php echo $item['stock_quantity']; ?>" data-price="<?php echo $item['price']; ?>" data-product-id="<?php echo $item['product_id']; ?>" onchange="updateSubtotal(this, event)">
                                 <button type="button" class="qty-btn" onclick="changeQty(this, 1)">＋</button>
                             </div>
                             <div class="subtotal">小計：<span class="subtotal-value">$<?php echo $item['subtotal']; ?></span></div>
+                            <?php endif; ?>
                             <button type="button" class="delete-btn" onclick="deleteProduct('<?php echo $item['product_id']; ?>', 'delete')">刪除商品</button>
                         </div>
                     </div>
