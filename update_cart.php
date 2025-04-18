@@ -3,6 +3,8 @@ session_start();
 require_once './lib/db.php';
 $conn = getDBConnection();
 
+header('Content-Type: text/plain'); // 一定記得加！
+
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo "未登入";

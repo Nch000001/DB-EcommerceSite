@@ -106,7 +106,8 @@ while ($row = $result->fetch_assoc()) {
                         <div class="cart-item-row">
                             <div class="price">單價：$<?php echo $item['price']; ?></div>
                             <?php if ($item['stock_quantity'] <= 0): ?>
-                                <div style="color: red; font-weight: bold;">⚠️ 物品缺貨中</div>
+                                <input value="<?php echo $item['product_id']; ?>" style="display: none;">
+                                <div style="color: red; font-weight: bold;" >⚠️ 物品缺貨中</div>
                             <?php else: ?>
                             <div class="quantity-control">
                                 <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
@@ -174,11 +175,16 @@ function updateTotal() {
     document.querySelectorAll('.product-box').forEach(item => {
         const checkbox = item.querySelector('.product-checkbox');
         const qtyInput = item.querySelector('.qty-input');
+        if (!qtyInput) {
+            console.warn("⚠️ 找不到 .qty-input，跳過此商品");
+            return;
+        }
+
         const price = parseFloat(qtyInput.dataset.price);
         const qty = parseInt(qtyInput.value);
         const subtotal = qty * price;
 
-        if (checkbox.checked) {
+        if (checkbox && checkbox.checked) {
             total += subtotal;
         }
 
@@ -282,6 +288,9 @@ function deleteProduct(productId, from = '') {
         if (productBox) {
             productBox.remove();
         }
+        else{
+            console.warn(`⚠️ 沒有找到對應的 input，productId = ${productId}`);
+        }
 
         // ✅ 更新總金額顯示
         updateTotal();
@@ -294,7 +303,7 @@ function deleteProduct(productId, from = '') {
             `;
 
             // ✅ 移除浮動結帳區塊（可選）
-            // const summary = document.querySelector('.floating-summary');
+            // conaddEventListener;
             // if (summary) summary.remove();
         }
     })
