@@ -23,12 +23,13 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
   </style>
 </head>
 <body class="container py-4">
-  <h3 class="mb-4">懶人商品新增</h3>
+  <h3 class="mb-4">懶人商品新增</h3> 
 
   <form id="productForm">
     <div id="productCards"></div>
     <button type="submit" class="btn btn-primary mt-3">一次送出全部</button>
     <button type="button" class="btn btn-success mt-3" onclick="addCard()">+ 新增商品</button>
+    <button type="submit" class="btn btn-link mt-3"><a href ="../ecommerce_admin.php?mode=add">返回</a></button>
   </form>
 
   <!-- 彈窗模組包含 -->
@@ -43,6 +44,7 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
         <strong>新商品</strong>
         <span class="toggle-note">點此摺疊</span>
         <button type="button" class="btn btn-sm btn-danger remove-btn" onclick="removeCard(this)">刪除</button>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="togglePreview(this)">預覽</button>
       </div>
       <div class="card-body">
         <div class="row g-3">
@@ -105,11 +107,32 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
           </div>
           <div class="col-md-6">
             <label>詳細描述</label>
-            <textarea name="detail_description[]" class="form-control"></textarea>
-          </div>
+            <textarea name="detail_description[]" class="form-control" rows="4"></textarea>
+            <input type="file" accept="image/*" multiple class="form-control mt-2" onchange="handleDescriptionImages(this)">
+          </div> 
+        </div>
+          
+      </div>
+      <div class="preview collapse mt-3 border rounded p-3 bg-light">
+      <div class="row">
+        <div class="col-md-4">
+          <img class="preview-img img-fluid mb-2" src="" alt="預覽圖片">
+        </div>
+        <div class="col-md-8">
+          <h5 class="preview-title">商品名稱</h5>
+          <p class="preview-price text-danger fw-bold">$價格</p>
+          <p class="preview-category-brand text-muted">分類 - 品牌</p>
+          <p class="preview-tags small">標籤：<span class="text-secondary">無</span></p>
+          <p class="preview-shortdesc mb-2">短描述預覽...</p>
+          <pre class="preview-detaildesc bg-white p-2 border rounded small text-wrap"></pre>
         </div>
       </div>
+      <div class="text-end">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="this.closest('.preview').classList.remove('show')">關閉預覽</button>
+      </div>
     </div>
+    </div>
+    
   </template>
 
   <script>
@@ -144,25 +167,55 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
     }
 
     function removeCard(btn) {
-        if (!confirm('確定要刪除這筆商品（包含已選圖片）？')) return;
+      if (!confirm('確定要刪除這筆商品（包含已選圖片）？')) return;
 
-        const card = btn.closest('.card');
-        const imageInput = card.querySelector('input[type="file"]');
-        const hiddenImage = card.querySelector('input[type="hidden"][name="image_path[]"]');
+      const card = btn.closest('.card');
+      const hiddenImage = card.querySelector('input[type="hidden"][name="image_path[]"]');
 
-        // 如果這張卡片上有上傳過的圖片，就 AJAX 刪掉它
-        if (hiddenImage && hiddenImage.value) {
-            const fileName = hiddenImage.value.split('/').pop();
-            fetch('lazy_delete_image.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `filename=${encodeURIComponent(fileName)}`
+      // 主圖刪除
+      if (hiddenImage && hiddenImage.value) {
+        const fileName = hiddenImage.value.split('/').pop();
+        fetch('lazy_delete_image.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `filename=${encodeURIComponent(fileName)}`
+        });
+      }
+
+      //詳細描述圖片刪除
+      const detailText = card.querySelector('textarea[name="detail_description[]"]');
+      if (detailText && detailText.value) {
+        const lines = detailText.value.split(/\r?\n/);
+        lines.forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('img/')) {
+            const fileName = trimmed.split('/').pop();
+            fetch('lazy_delete_detail_images.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: `filename=${encodeURIComponent(fileName)}`
             });
-        }
+          }
+        });
+      }
+      
+      // const detailText = card.querySelector('textarea[name="detail_description[]"]'); 
+      // if (detailText && detailText.value) {
+      //   const lines = detailText.value.split('\\n');
+      //   lines.forEach(line => {
+      //     if (line.trim().startsWith('img/')) {
+      //       const fileName = line.trim().split('/').pop();
+      //       fetch('lazy_delete_detail_images.php', {
+      //         method: 'POST',
+      //         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      //         body: `filename=${encodeURIComponent(fileName)}`
+      //       });
+      //     }
+      //   });
+      // }
 
-        card.remove(); // 最後再從畫面刪除整張卡片
+      card.remove();
     }
-
 
     function handleImageUpload(input) {
 
@@ -206,7 +259,6 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
         });
     }
 
-
     function deletePreviewImage(btn) {
         if (!confirm('確定要刪除這張圖片嗎？')) return;
 
@@ -224,6 +276,7 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `filename=${encodeURIComponent(fileName)}`
             });
+            
         }
 
         // 清空畫面預覽
@@ -276,6 +329,58 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
       modal.show();
     }
 
+    function handleDescriptionImages(input) {
+      const files = input.files;
+      if (!files.length) return;
+
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append('images[]', file);
+      }
+
+      fetch('lazy_upload_detail_images.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) {
+          alert(data.error || '圖片上傳失敗');
+          return;
+        }
+        const textarea = input.closest('.card-body').querySelector('textarea[name="detail_description[]"]');
+        textarea.value += data.paths.map(p => p + '\n').join('');
+      })
+      .catch(() => alert('圖片上傳失敗（連線錯誤）'));
+    }
+    function togglePreview(btn) {
+      const card = btn.closest('.card');
+      const preview = card.querySelector('.preview');
+      const name = card.querySelector('input[name="product_name[]"]').value;
+      const price = card.querySelector('input[name="price[]"]').value;
+      const short = card.querySelector('textarea[name="short_description[]"]').value;
+      const detail = card.querySelector('textarea[name="detail_description[]"]').value;
+
+      const categorySelect = card.querySelector('select[name="category_id[]"]');
+      const brandSelect = card.querySelector('select[name="brand_id[]"]');
+      const category = categorySelect.options[categorySelect.selectedIndex]?.text || '未選分類';
+      const brand = brandSelect.options[brandSelect.selectedIndex]?.text || '未選品牌';
+
+      const image = card.querySelector('.image-preview').getAttribute('src');
+      const tagSection = card.querySelector('.tag-section');
+      const checkedTags = tagSection.querySelectorAll('input[type="checkbox"]:checked');
+      const tagTexts = Array.from(checkedTags).map(t => t.parentElement.textContent.trim());
+
+      preview.querySelector('.preview-img').src = image || '';
+      preview.querySelector('.preview-title').textContent = name;
+      preview.querySelector('.preview-price').textContent = '$' + (price || '0');
+      preview.querySelector('.preview-category-brand').textContent = `${category} - ${brand}`;
+      preview.querySelector('.preview-tags span').textContent = tagTexts.join('、') || '無';
+      preview.querySelector('.preview-shortdesc').textContent = short;
+      preview.querySelector('.preview-detaildesc').textContent = detail;
+
+      preview.classList.add('show');
+    }
     window.onload = addCard;
   </script>
 </body>

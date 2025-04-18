@@ -12,6 +12,7 @@ if (!isset($_SESSION['super_user_account'])) {
 $categories = $conn->query("SELECT category_id, name FROM category ORDER BY name")->fetch_all(MYSQLI_ASSOC);
 $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_all(MYSQLI_ASSOC);
 $editing = isset($product);
+
 ?>
 
 <!DOCTYPE html>
@@ -66,10 +67,17 @@ $editing = isset($product);
   </div>
 
   <div class="mb-3">
-    <label class="form-label">圖片路徑</label>
-    <input type="text" name="image_path" id="image_path" class="form-control" value="<?= $editing ? htmlspecialchars($product['image_path']) : 'img/' ?>" required>
-    <button type="button" class="btn btn-outline-secondary mt-2" onclick="previewImage()">預覽圖片</button>
-    <div id="image_preview" class="mt-3"></div>
+    <label class="form-label">商品主圖</label>
+    <input type="file" accept="image/*" class="form-control" onchange="handleImageUpload(this)">
+    <?php if ($editing && !empty($product['image_path'])): ?>
+      <img src="../../<?= $product['image_path'] ?>" class="image-preview mt-2" style="max-height: 180px; border: 1px solid #ddd; border-radius: 5px;">
+      <input type="hidden" name="image_path" value="<?= $product['image_path'] ?>">
+      <button type="button" class="btn btn-outline-danger btn-sm mt-2" onclick="deletePreviewImage(this)">刪除圖片</button>
+    <?php else: ?>
+      <img class="image-preview mt-2 d-none" style="max-height: 180px; border: 1px solid #ddd; border-radius: 5px;">
+      <input type="hidden" name="image_path">
+      <button type="button" class="btn btn-outline-danger btn-sm mt-2 d-none" onclick="deletePreviewImage(this)">刪除圖片</button>
+    <?php endif; ?>
   </div>
 
   <div class="mb-3">
@@ -79,7 +87,8 @@ $editing = isset($product);
 
   <div class="mb-3">
     <label class="form-label">詳細描述</label>
-    <textarea name="detail_description" class="form-control" rows="5"><?= $editing ? htmlspecialchars($product['detail_description']) : '' ?></textarea>
+    <textarea name="detail_description" class="form-control" rows="5"><?php if ($editing) echo htmlspecialchars($product['detail_description']); ?></textarea>
+    <input type="file" accept="image/*" multiple class="form-control mt-2" onchange="handleDescriptionImages(this)">
   </div>
 
   <div class="mb-3">
@@ -133,15 +142,15 @@ $editing = isset($product);
 
 
 <script>
-function previewImage() {
-  const path = document.getElementById('image_path').value.trim();
-  const preview = document.getElementById('image_preview');
-  if (path !== '') {
-    preview.innerHTML = `<img src="../../${path}" class="img-fluid" style="max-height:200px">`;
-  } else {
-    preview.innerHTML = '<span class="text-danger">尚未提供圖片路徑</span>';
-  }
-}
+// function previewImage() {
+//   const path = document.getElementById('image_path').value.trim();
+//   const preview = document.getElementById('image_preview');
+//   if (path !== '') {
+//     preview.innerHTML = `<img src="../../${path}" class="img-fluid" style="max-height:200px">`;
+//   } else {
+//     preview.innerHTML = '<span class="text-danger">尚未提供圖片路徑</span>';
+//   }
+// }
 
 function resetTags() {
   const radios = document.querySelectorAll('#tag-section input[type="radio"]');
@@ -180,6 +189,112 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+function handleImageUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const group = input.closest('.mb-3');
+  const hidden = group.querySelector('input[type="hidden"]');
+
+  // 如果已有圖片，先刪掉舊的
+  if (hidden && hidden.value) {
+    const oldFilename = hidden.value.split('/').pop();
+    fetch('../lazy/lazy_delete_image.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `filename=${encodeURIComponent(oldFilename)}`
+    });
+  }
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  fetch('../lazy/lazy_upload_image.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    // console.log('伺服器回傳：', data);
+    if (data.success) {
+    const preview = group.querySelector('.image-preview');
+    const delBtn = group.querySelector('.btn-outline-danger');
+
+    preview.src = '../../' + data.filename;
+    preview.classList.remove('d-none');
+    hidden.value = `img/${data.filename}`;
+    delBtn.classList.remove('d-none');
+  } else {
+    alert(data.error || '圖片上傳失敗');
+  }
+  })
+  .catch(() => alert('圖片上傳失敗（連線錯誤）'));
+}
+
+function deletePreviewImage(btn) {
+  if (!confirm('確定要刪除這張圖片嗎？')) return;
+
+  const group = btn.closest('.mb-3');
+  const preview = group.querySelector('.image-preview');
+  const hidden = group.querySelector('input[type="hidden"]');
+  const input = group.querySelector('input[type="file"]');
+
+  if (hidden && hidden.value) {
+    const filename = hidden.value.split('/').pop();
+    fetch('../lazy/lazy_delete_image.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `filename=${encodeURIComponent(filename)}`
+    });
+  }
+
+  preview.src = '';
+  preview.classList.add('d-none');
+  hidden.value = '';
+  btn.classList.add('d-none');
+  input.value = '';
+}
+
+function handleDescriptionImages(input) {
+  const files = input.files;
+  if (!files.length) return;
+
+  const group = input.closest('.mb-3');
+  const textarea = group.querySelector('textarea');
+
+  // 刪除原本描述中所有圖片路徑
+  const oldPaths = textarea.value.trim().split('\n').filter(line => line.startsWith('img/'));
+  for (const path of oldPaths) {
+    const fileName = path.split('/').pop();
+    fetch('../lazy/lazy_delete_detail_images.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `filename=${encodeURIComponent(fileName)}`
+    });
+  }
+  textarea.value = ''; // 清空原內容
+
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append('images[]', file);
+  }
+
+  fetch('../lazy/lazy_upload_detail_images.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      alert(data.error || '圖片上傳失敗');
+      return;
+    }
+    textarea.value += data.paths.map(p => p + '\n').join('');
+  })
+  .catch(() => alert('圖片上傳失敗（連線錯誤）'));
+}
+
 </script>
 
 </body>

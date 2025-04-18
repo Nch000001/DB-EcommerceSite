@@ -13,7 +13,33 @@ if (!isset($_POST['product_id'])) {
     exit('缺少商品 ID');
 }
 
+
+
 $product_id = $conn->real_escape_string($_POST['product_id']);
+
+// 找圖片資料
+$res = $conn->query("SELECT image_path, detail_description, product_name FROM product WHERE product_id = '$product_id'");
+if ($res && $res->num_rows > 0) {
+  $row = $res->fetch_assoc();
+  $image_path = $row['image_path'];
+  $detail_description = $row['detail_description'];
+  $product_name = $row['product_name'];
+
+  // 刪除主圖
+  if ($image_path && file_exists("../../" . $image_path)) {
+    unlink("../../" . $image_path);
+  }
+
+  // 刪除描述中的圖
+  $lines = explode("\n", $detail_description);
+  foreach ($lines as $line) {
+    $trimmed = trim($line);
+    if (strpos($trimmed, 'img/') === 0 && file_exists("../../" . $trimmed)) {
+      unlink("../../" . $trimmed);
+    }
+  }
+}
+
 
 //紀錄log
 require_once '../../lib/log_helper.php'; 
@@ -31,7 +57,7 @@ $category_name = $info['category_name'] ?? '未知分類';
 $brand_name = $info['brand_name'] ?? '未知品牌';
 
 $details = "刪除 $category_name [$product_name, $brand_name]";
-
+ 
 // 刪除標籤
 $conn->query("DELETE FROM product_tag WHERE product_id = '$product_id'");
 

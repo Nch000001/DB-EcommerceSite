@@ -50,7 +50,7 @@ $mode = isset($_GET['mode']) && $_GET['mode'] === 'manage' ? 'manage' : 'add';
 </div>
 
 <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
-  <a href="<?= $mode === 'add' ? 'product/product_form.php' : 'product/product_manage.php' ?>" class="btn btn-outline-dark px-4 py-2">產品</a>
+  <a href="<?= $mode === 'add' ? 'lazy/lazy_form.php' : 'product/product_manage.php' ?>" class="btn btn-outline-dark px-4 py-2">產品</a>
   <a href="<?= $mode === 'add' ? 'ad/ad_form.php' : 'ad/ad_manage.php' ?>" class="btn btn-outline-dark px-4 py-2">廣告</a>
   <a href="ecommerce_manage.php?table=user" class="btn btn-outline-dark px-4 py-2">用戶</a>
   <a href="<?= $mode === 'add' ? 'tag/tag_type_add.php' : 'tag/tag_type_manage.php' ?>" class="btn btn-outline-dark px-4 py-2">標籤</a>
