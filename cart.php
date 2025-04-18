@@ -91,7 +91,6 @@ while ($row = $result->fetch_assoc()) {
                 <h2>🛒 我的購物車</h2>
                 <div class="actions">
                     <button type="button" onclick="toggleSelectAll()">全選 / 取消全選</button>
-                    <!-- <button type="button" onclick="removeUnselected()">移除未勾選商品</button> -->
                 </div>
             </div>
 
@@ -118,7 +117,32 @@ while ($row = $result->fetch_assoc()) {
     <?php endif; ?>
 </div>
 
+<button onclick="goBack()" style="
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background-color: #888;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+">🔙 返回上一頁</button>
+
+
+
 <script>
+function goBack() {
+    if (document.referrer) {
+        window.history.back();
+    } else {
+        window.location.href = 'index.php'; // 沒有上一頁就回首頁
+    }
+}
+
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.product-checkbox');
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
@@ -126,16 +150,6 @@ function toggleSelectAll() {
     updateTotal();
 }
 
-function removeUnselected() {
-    const items = document.querySelectorAll('.product-box');
-    items.forEach(item => {
-        const checkbox = item.querySelector('.product-checkbox');
-        if (!checkbox.checked) {
-            item.remove();
-        }
-    });
-    updateTotal();
-}
 
 function updateTotal() {
     let total = 0;

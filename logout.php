@@ -15,7 +15,7 @@ session_unset();
 session_destroy();  
 
 if ($isAdmin) {
-    header("Location: /ecommerce/admin/ecommerce_admin_login.php");
+    header("Location: /ecommerce/index.php");
 } else {
     header("Location: /ecommerce/index.php");
 }

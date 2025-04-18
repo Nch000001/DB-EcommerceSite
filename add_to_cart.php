@@ -79,7 +79,8 @@ if ($result->num_rows > 0) {
 if ($action === 'buy') {
     echo "<script>window.location.href='cart.php';</script>";
 } else {
-    echo "<script>alert('已加入購物車'); window.history.back();</script>";
+    // echo "<script>alert('已加入購物車'); window.history.back();</script>";
+    echo "<script>window.history.back();</script>";
 }
 exit();
 ?>
