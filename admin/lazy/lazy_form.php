@@ -60,7 +60,7 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
             <label>庫存數量</label>
             <input type="number" name="stock_quantity[]" class="form-control" required>
           </div>
-                                                                    <!--反正不會有人真的看這個Code 我只能說寫這種耦合性低到令人髮指的大便真的會反胃-->
+                                                                    <!--反正不會有人真的看這個Code 我只能說寫這種耦合性高到令人髮指的大便真的會反胃-->
           <div class="col-md-6">
             <label>分類</label>
             <div class="input-group">
@@ -98,7 +98,7 @@ $brands = $conn->query("SELECT brand_id, name FROM brand ORDER BY name")->fetch_
             <input type="file" class="form-control" accept="image/*" onchange="handleImageUpload(this)">
             <img class="image-preview d-none" alt="預覽圖片">
             <div class="preview-info"></div>
-            <button class="btn btn-sm btn-outline-danger mt-2 d-none" onclick="deletePreviewImage(this)">刪除圖片</button>
+            <button type="button" class="btn btn-sm btn-outline-danger mt-2 d-none" onclick="deletePreviewImage(this)">刪除圖片</button>
           </div>
 
           <div class="col-md-6">
