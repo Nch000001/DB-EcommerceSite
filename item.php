@@ -445,12 +445,12 @@ $otherResult = $stmt2->get_result();
     </a>
   <?php endif; ?>
 
-<!-- 保留原 footer -->
+  <!-- 保留原 footer -->
   <div class="footer">
     <div class="contact">
-      <span>電話: 123-456-789</span>　
-      <span>Email: example@mail.com</span>　
-      <span>地址: 台北市XX區XX路</span>
+        <span>電話: 0900000000</span>　
+        <span>Email: dbecommercesite@gmail.com</span>　
+        <span>地址: 407802臺中市西屯區文華路100號</span>
     </div>
   </div>
 

@@ -83,7 +83,7 @@ while ($row = $result->fetch_assoc()) {
         <h2>🛒 我的購物車</h2>
         <p>您的購物車是空的。</p>
     <?php else: ?>
-        <form id="cartForm" action="checkout.php" method="POST" onsubmit="return false;">
+        <form id="cartForm" action="checkout_info.php" method="POST" onsubmit="return false;">
             <div class="cart-header">
                 <h2>🛒 我的購物車</h2>
                 <div class="actions">
@@ -143,11 +143,27 @@ while ($row = $result->fetch_assoc()) {
 
 
 <script>
+
+function getCookie(name) {
+    const value = "; " + document.cookie;
+    const parts = value.split("; " + name + "=");
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+}
+
 function goBack() {
-    if (document.referrer) {
-        window.history.back();
+    const fromCheckout = getCookie('from_checkout');
+
+    if (fromCheckout === "1") {
+        // ❌ 來自 checkout 頁面，回首頁
+        window.location.href = 'index.php';
     } else {
-        window.location.href = 'index.php'; // 沒有上一頁就回首頁
+        // ✅ 不是來自 checkout 頁面，回上一頁
+        if (document.referrer) {
+            window.history.back();
+        } else {
+            window.location.href = 'index.php';
+        }
     }
 }
 
@@ -349,6 +365,15 @@ window.addEventListener('DOMContentLoaded', function () {
             updateSubtotal(input); // 自動呼叫更新
         }
     });
+
+    const referrer = document.referrer; // 上一頁網址
+    const disallowedPages = ['checkout.php', 'checkout_info.php'];
+
+    // 檢查 referrer 是否包含這兩個頁面其中之一
+    const cameFromDisallowed = disallowedPages.some(page => referrer.includes(page));
+
+    // 寫入 cookie，供 PHP 使用
+    document.cookie = "from_checkout=" + (cameFromDisallowed ? "1" : "0") + "; path=/";
 });
 </script>
 

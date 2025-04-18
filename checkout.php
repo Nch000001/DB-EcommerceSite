@@ -8,35 +8,87 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+$user_id = $_SESSION['user_id'];
+
 if (empty($_POST['selected_products'])) {
     echo "❗ 請先選擇商品再進行結帳。";
+    header("Location: cart.php");
     exit();
 }
 
+// 🧪 除錯印出 POST 資料
+echo "<pre>";
+print_r($_POST);
+echo "</pre>";
+
 $selected = $_POST['selected_products'];
 $errors = [];
+$product_ids = [];
+$parsed_items = [];
+$total_amount = 0;
 
-foreach ($selected as $product_id) {
-    // 你可以根據實際送出的表單把數量也一起處理，這裡假設你有送出 quantity 資料（需調整表單送出方式）
-    $quantity = intval($_POST['quantities'][$product_id] ?? 1);
+foreach ($selected as $entry) {
+    // 將 product_id 和其餘資訊分開
+    list($product_id, $rest) = explode(':', $entry, 2);
+    list($name, $price, $quantity) = explode(',', $rest);
 
+    $quantity = intval($quantity);
+    $price = floatval($price);
+
+    $product_ids[] = $product_id;
+    $parsed_items[] = [
+        'product_id' => $product_id,
+        'name' => $name,
+        'price' => $price,
+        'quantity' => $quantity
+    ];
+    $total_amount += $price * $quantity;
+
+    // 查詢該商品目前的庫存
     $stmt = $conn->prepare("SELECT stock_quantity FROM product WHERE product_id = ?");
     $stmt->bind_param("s", $product_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
 
-    if (!$row || $quantity > $row['stock_quantity']) {
-        $errors[] = "商品 ID $product_id 的數量超過庫存。";
+    if (!$row) {
+        $errors[] = "❌ 找不到商品 ID：$product_id";
+        continue;
     }
-}
 
+    if ($quantity > $row['stock_quantity']) {
+        $errors[] = "❗ 商品「{$name}」的數量超過庫存（庫存：{$row['stock_quantity']} : 請求：{$quantity}）";    }
+    }
+
+// 顯示錯誤訊息（若有）
 if (!empty($errors)) {
-    echo implode("<br>", $errors);
-    exit();
+  $msg = implode("\n", $errors);
+  echo "<script>alert(" . json_encode($msg) . "); window.location.href = 'cart.php';</script>";
+  exit();
 }
 
-// ✅ 接下來可進行新增訂單或其他結帳流程
-echo "✅ 所有商品庫存確認成功，可結帳！";
+//扣除每一項商品的庫存
+foreach ($parsed_items as $item) {
+  $stmt = $conn->prepare("UPDATE product SET stock_quantity = stock_quantity - ? WHERE product_id = ?");
+  $stmt->bind_param("is", $item['quantity'], $item['product_id']);
+  $stmt->execute();
+}
 
+
+
+//插入訂單至 orders 表
+$status = 'not pay';
+$stmt = $conn->prepare("INSERT INTO orders (user_id, status, total_amount) VALUES (?, ?, ?)");
+$stmt->bind_param("ssi", $user_id, $status, $total_amount);
+$stmt->execute();
+$order_id = $conn->insert_id;
+
+//插入每一筆訂單明細到 order_items
+$stmtItem = $conn->prepare("INSERT INTO order_item (order_id, product_id, product_name, price, quantity) VALUES (?, ?, ?, ?, ?)");
+foreach ($parsed_items as $item) {
+    $stmtItem->bind_param("issii", $order_id, $item['product_id'], $item['name'], $item['price'], $item['quantity']);
+    $stmtItem->execute();
+}
+
+exit();
 ?>
