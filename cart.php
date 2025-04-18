@@ -86,12 +86,12 @@ while ($row = $result->fetch_assoc()) {
         <h2>🛒 我的購物車</h2>
         <p>您的購物車是空的。</p>
     <?php else: ?>
-        <form id="cartForm" action="checkout.php" method="POST">
+        <form id="cartForm" action="checkout.php" method="POST" onsubmit="return false;">
             <div class="cart-header">
                 <h2>🛒 我的購物車</h2>
                 <div class="actions">
                     <button type="button" onclick="toggleSelectAll()">全選 / 取消全選</button>
-                    <button type="button" onclick="removeUnselected()">移除未勾選商品</button>
+                    <!-- <button type="button" onclick="removeUnselected()">移除未勾選商品</button> -->
                 </div>
             </div>
 
@@ -105,7 +105,7 @@ while ($row = $result->fetch_assoc()) {
                             <div class="price">單價：$<?php echo $item['price']; ?></div>
                             <div class="quantity-control">
                                 <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
-                                <input type="number" class="qty-input" value="<?php echo $item['quantity']; ?>" min="0" max="<?php echo $item['stock_quantity']; ?>" data-price="<?php echo $item['price']; ?>" data-product-id="<?php echo $item['product_id']; ?>" onchange="updateSubtotal(this)">
+                                <input type="number" class="qty-input" value="<?php echo $item['quantity']; ?>" min="0" max="<?php echo $item['stock_quantity']; ?>" data-price="<?php echo $item['price']; ?>" data-product-id="<?php echo $item['product_id']; ?>" onchange="updateSubtotal(this, event)">
                                 <button type="button" class="qty-btn" onclick="changeQty(this, 1)">＋</button>
                             </div>
                             <div class="subtotal">小計：<span class="subtotal-value">$<?php echo $item['subtotal']; ?></span></div>
@@ -169,7 +169,12 @@ function changeQty(button, delta) {
     updateSubtotal(input);
 }
 
-function updateSubtotal(input) {
+function updateSubtotal(input, event = null) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
     const max = parseInt(input.max);
     const productId = input.dataset.productId;
     let val = parseInt(input.value);
