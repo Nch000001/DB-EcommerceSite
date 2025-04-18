@@ -109,7 +109,7 @@ while ($row = $result->fetch_assoc()) {
                                 <button type="button" class="qty-btn" onclick="changeQty(this, 1)">＋</button>
                             </div>
                             <div class="subtotal">小計：<span class="subtotal-value">$<?php echo $item['subtotal']; ?></span></div>
-                            <button type="button" class="delete-btn" onclick="deleteProduct('<?php echo $item['product_id']; ?>')">刪除商品</button>
+                            <button type="button" class="delete-btn" onclick="deleteProduct('<?php echo $item['product_id']; ?>', 'delete')">刪除商品</button>
                         </div>
                     </div>
                 </div>
@@ -198,7 +198,13 @@ function updateSubtotal(input, event = null) {
     updateTotal();
 }
 
-function deleteProduct(productId) {
+function deleteProduct(productId, from='') {
+    if (from === 'delete') {
+        if (!confirm('確定要刪除這項商品嗎？')) {
+            return;
+        }
+    }
+
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = 'cart.php';
@@ -212,6 +218,22 @@ function deleteProduct(productId) {
     document.body.appendChild(form);
     form.submit();
 }
+
+
+document.querySelectorAll('.cart-item.product-box').forEach(box => {
+    box.addEventListener('click', function (e) {
+        // 防止當你點到某些內部元素時造成重複觸發
+        if (e.target.classList.contains('qty-btn') ||
+            e.target.classList.contains('qty-input') ||
+            e.target.classList.contains('delete-btn')) {
+            return; // 忽略這些按鈕或輸入欄位
+        }
+
+        const checkbox = this.querySelector('.product-checkbox');
+        checkbox.checked = !checkbox.checked;
+        updateTotal();
+    });
+});
 </script>
 
 </body>
