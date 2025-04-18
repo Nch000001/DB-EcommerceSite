@@ -97,7 +97,7 @@ while ($row = $result->fetch_assoc()) {
                     <?php if ($item['stock_quantity'] <= 0): ?>
                         <input type="checkbox" disabled>
                     <?php else: ?>
-                        <input type="checkbox" class="product-checkbox" name="selected_products[]" value="<?php echo $item['product_id']; ?>" checked onchange="updateTotal()">
+                        <input type="checkbox" class="product-checkbox" name="selected_products[]" value="<?php echo $item['product_id'] . ':' . $item['quantity']; ?>" checked onchange="updateTotal()">
                     <?php endif; ?>
 
                     <img src="<?php echo htmlspecialchars($item['image_path']); ?>" alt="商品圖片">
@@ -237,11 +237,13 @@ function updateSubtotal(input, event = null) {
     input.value = val;
 
     if (val === 0) {
-        if (confirm('數量為 0，是否從購物車中移除這項商品？')) {
+        if (!confirm('確定要刪除這項商品嗎？')) {
+            input.value = 1;
+            return;
+        }
+        else {
             deleteProduct(productId);
             return;
-        } else {
-            input.value = 1;
         }
     }
 
@@ -259,6 +261,13 @@ function updateSubtotal(input, event = null) {
     }).then(res => res.text())
     .then(console.log) // ✅ 可視需求換成 alert/debug
 
+
+    // ✅ 同步更新 checkbox 的 value
+    const checkbox = document.querySelector(`.product-checkbox[value^="${productId}:"]`);
+    if (checkbox) {
+        checkbox.value = `${productId}:${val}`;
+    }
+    
     updateTotal();
 }
 
@@ -331,6 +340,15 @@ document.querySelectorAll('.cart-item.product-box').forEach(box => {
 
 window.addEventListener('DOMContentLoaded', function () {
     updateTotal();
+
+    document.querySelectorAll('.qty-input').forEach(input => {
+        const max = parseInt(input.max);
+        let val = parseInt(input.value);
+        if (val > max) {
+            input.value = max;
+            updateSubtotal(input); // 自動呼叫更新
+        }
+    });
 });
 </script>
 
