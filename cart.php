@@ -10,15 +10,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// 處理刪除單筆商品
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product_id'])) {
-    $deleteId = $_POST['delete_product_id'];
-    $stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ? AND product_id = ?");
-    $stmt->bind_param("ss", $user_id, $deleteId);
-    $stmt->execute();
-    header("Location: cart.php");
-    exit();
-}
 
 $sql = "
     SELECT c.product_id, c.quantity, p.product_name, p.price, p.image_path, p.stock_quantity
@@ -182,7 +173,7 @@ function updateTotal() {
         }
 
         item.querySelector('.subtotal-value').innerText = '$' + subtotal;
-        item.setAttribute('data-subtotal', subtotal.toFixed(2));
+        item.setAttribute('data-subtotal', subtotal);
     });
 
     document.querySelector('#totalDisplay .total-price').innerText = '$' + total;
@@ -238,28 +229,69 @@ function updateSubtotal(input, event = null) {
         }
     }
 
+
+    // 🔄 發送更新請求到後端
+    fetch('update_cart.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: val
+        })
+    }).then(res => res.text())
+    .then(console.log) // ✅ 可視需求換成 alert/debug
+
     updateTotal();
 }
 
-function deleteProduct(productId, from='') {
+function deleteProduct(productId, from = '') {
     if (from === 'delete') {
         if (!confirm('確定要刪除這項商品嗎？')) {
             return;
         }
     }
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'cart.php';
+    // 🔄 使用 fetch 呼叫 update_cart.php，quantity = 0 表示刪除
+    fetch('update_cart.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            product_id: productId,
+            quantity: 0
+        })
+    })
+    .then(res => res.text())
+    .then(msg => {
+        console.log(msg);
+        // ✅ 從畫面上移除該商品區塊
+        const productBox = document.querySelector(`.product-box input[value="${productId}"]`)?.closest('.product-box');
+        if (productBox) {
+            productBox.remove();
+        }
 
-    const hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = 'delete_product_id';
-    hiddenInput.value = productId;
+        // ✅ 更新總金額顯示
+        updateTotal();
+        const remainingItems = document.querySelectorAll('.product-box');
+        if (remainingItems.length === 0) {
+            const cartContainer = document.querySelector('.cart-container');
+            cartContainer.innerHTML = `
+                <h2>🛒 我的購物車</h2>
+                <p>您的購物車是空的。</p>
+            `;
 
-    form.appendChild(hiddenInput);
-    document.body.appendChild(form);
-    form.submit();
+            // ✅ 移除浮動結帳區塊（可選）
+            // const summary = document.querySelector('.floating-summary');
+            // if (summary) summary.remove();
+        }
+    })
+    .catch(err => {
+        console.error('刪除失敗:', err);
+        alert('⚠️ 刪除商品時發生錯誤，請稍後再試');
+    });
 }
 
 
@@ -276,6 +308,10 @@ document.querySelectorAll('.cart-item.product-box').forEach(box => {
         checkbox.checked = !checkbox.checked;
         updateTotal();
     });
+});
+
+window.addEventListener('DOMContentLoaded', function () {
+    updateTotal();
 });
 </script>
 
