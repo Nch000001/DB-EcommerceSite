@@ -14,6 +14,7 @@ if ($name === '') {
   exit;
 }
 
+// 檢查品牌是否已存在
 $stmt = $conn->prepare("SELECT brand_id FROM brand WHERE name = ?");
 $stmt->bind_param("s", $name);
 $stmt->execute();
@@ -24,20 +25,19 @@ if ($stmt->num_rows > 0) {
 }
 $stmt->close();
 
-$prefix = strtoupper(substr(preg_replace('/\\s+/', '', $name), 0, 3));
-$res = $conn->query("SELECT brand_id FROM brand WHERE brand_id LIKE '$prefix%' ORDER BY brand_id DESC LIMIT 1");
-$seq = $res->num_rows > 0 ? str_pad((intval(substr($res->fetch_assoc()['brand_id'], strlen($prefix))) + 1), 2, '0', STR_PAD_LEFT) : '01';
-$brand_id = $prefix . $seq;
+// 插入品牌
+$stmt = $conn->prepare("INSERT INTO brand (name) VALUES (?)");
+$stmt->bind_param("s", $name);
+$success = $stmt->execute();
 
-$stmt = $conn->prepare("INSERT INTO brand (brand_id, name) VALUES (?, ?)");
-$stmt->bind_param("ss", $brand_id, $name);
-if ($stmt->execute()) {
-  echo json_encode(['success' => true, 'brand_id' => $brand_id, 'name' => $name]);
+if ($success) {
+  $brand_id = $conn->insert_id;
+  echo json_encode(['success' => true, 'brand_id' => (int)$brand_id, 'name' => $name]);
 
   // 紀錄 log
   $details = "新增品牌 [ $name ]";
   log_admin_action($conn, $super_user_id, '新增', 'brand', $brand_id, $details);
-  // 紀錄 log 結束
+  // Log end
 } else {
   echo json_encode(['success' => false, 'error' => '資料庫錯誤']);
 }
