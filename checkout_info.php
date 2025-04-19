@@ -90,7 +90,7 @@ if (!$user) {
     .form-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     h2 { text-align: center; margin-bottom: 20px; }
     label { font-weight: bold; margin-top: 15px; display: block; }
-    input[type="text"], select { width: 100%; padding: 10px; font-size: 16px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; }
+    input[type="text"], select { width: 100%; padding: 10px; font-size: 16px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;}
     input[required], select[required] { border-color: #f44336; }
     .submit-btn { margin-top: 25px; background-color: #4CAF50; color: white; font-size: 16px; padding: 12px; border: none; border-radius: 6px; cursor: pointer; width: 100%; }
     .submit-btn:hover { background-color: #45A049; }
