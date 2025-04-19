@@ -110,6 +110,7 @@ while ($row = $result->fetch_assoc()) {
                                 <div style="color: red; font-weight: bold;" >⚠️ 物品缺貨中</div>
                             <?php else: ?>
                             <div class="quantity-control">
+                                <input value="<?php echo $item['product_id']; ?>" style="display: none;">
                                 <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
                                 <input type="number" class="qty-input" value="<?php echo $item['quantity']; ?>" min="0" max="<?php echo $item['stock_quantity']; ?>" data-price="<?php echo $item['price']; ?>" data-product-id="<?php echo $item['product_id']; ?>" onchange="updateSubtotal(this, event)">
                                 <button type="button" class="qty-btn" onclick="changeQty(this, 1)">＋</button>
