@@ -11,14 +11,10 @@ if (!isset($_SESSION['user_id'])) {
 }
 $user_id = $_SESSION['user_id'];
 
-
-
-if (empty($_POST['selected_products'])) {
-    echo "❗ 請先選擇商品再進行結帳。";
-    header("Location: cart.php");
-    exit();
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['selected_products'])) {
+  header("Location: cart.php?error=expired");
+  exit();
 }
-
 
 $selected = $_POST['selected_products'];
 $errors = [];
