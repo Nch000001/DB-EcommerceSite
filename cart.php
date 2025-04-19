@@ -73,7 +73,7 @@ while ($row = $result->fetch_assoc()) {
 <div class="floating-summary">
     <div id="totalDisplay">
         <div>總金額</div>
-        <div class="total-price">$<?php echo $total; ?></div>
+        <div class="total-price">$<?php echo number_format($total); ?></div>
     </div>
     <button type="button" id="checkoutBtn" onclick="tryCheckout()">✅ 確認購買</button>
 </div>
@@ -104,7 +104,7 @@ while ($row = $result->fetch_assoc()) {
                     <div class="cart-item-details">
                         <div><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></div>
                         <div class="cart-item-row">
-                            <div class="price">單價：$<?php echo $item['price']; ?></div>
+                            <div class="price">單價：$<?php echo number_format($item['price']); ?></div>
                             <?php if ($item['stock_quantity'] <= 0): ?>
                                 <input value="<?php echo $item['product_id']; ?>" style="display: none;">
                                 <div style="color: red; font-weight: bold;" >⚠️ 物品缺貨中</div>
@@ -205,11 +205,11 @@ function updateTotal() {
             total += subtotal;
         }
 
-        item.querySelector('.subtotal-value').innerText = '$' + subtotal;
+        item.querySelector('.subtotal-value').innerText = '$' + subtotal.toLocaleString();
         item.setAttribute('data-subtotal', subtotal);
     });
 
-    document.querySelector('#totalDisplay .total-price').innerText = '$' + total;
+    document.querySelector('#totalDisplay .total-price').innerText = '$' + total.toLocaleString();
 
     // ✅ 修改按鈕行為與文字
     const checkoutBtn = document.getElementById('checkoutBtn');
