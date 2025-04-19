@@ -22,8 +22,14 @@ if (!isset($_POST['token']) || $_POST['token'] !== $_SESSION['checkout_token']) 
 }
 unset($_SESSION['checkout_token']);
 
+// echo '<pre>';
+// print_r($_POST);
+// echo '</pre>';
 
 $selected = $_POST['selected_products'];
+$u_name = $_POST['name'];
+$home_address = $_POST['home_address'];
+$phone_numbers = $_POST['phone_numbers'];
 $errors = [];
 $product_ids = [];
 $parsed_items = [];
@@ -73,8 +79,8 @@ foreach ($parsed_items as $item) {
 }
 
 $status = 'not pay';
-$stmt = $conn->prepare("INSERT INTO orders (user_id, status, total_amount) VALUES (?, ?, ?)");
-$stmt->bind_param("ssi", $user_id, $status, $total_amount);
+$stmt = $conn->prepare("INSERT INTO orders (user_id, status, total_amount, recipient_name, recipient_phone, shipping_address) VALUES (?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("ssisss", $user_id, $status, $total_amount, $u_name, $phone_numbers, $home_address);
 if (!$stmt->execute()) {
     showErrorPage(["❌ 訂單建立失敗：" . $stmt->error]);
     exit();

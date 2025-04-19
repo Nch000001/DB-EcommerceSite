@@ -2,7 +2,6 @@
 session_start();
 require_once './lib/db.php';
 $conn = getDBConnection();
-
 $_SESSION['checkout_token'] = bin2hex(random_bytes(16));
 
 if (!isset($_SESSION['user_id'])) {
@@ -105,13 +104,13 @@ if (!$user) {
     <h2>確認結帳資訊</h2>
 
     <form method="POST" action="checkout.php">
-      <label>姓名 *</label>
+      <label>收件人姓名 *</label>
       <input type="text" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
 
-      <label>地址 *</label>
+      <label>收件人地址 *</label>
       <input type="text" name="home_address" value="<?php echo htmlspecialchars($user['home_address']); ?>" required>
 
-      <label>電話 *</label>
+      <label>收件人電話 *</label>
       <input type="text" name="phone_numbers" value="<?php echo htmlspecialchars($user['phone_numbers']); ?>" pattern="09\d{8}" title="請輸入以 09 開頭的 10 碼手機號碼" required>
 
       <label>付款方式 *</label>
@@ -121,12 +120,12 @@ if (!$user) {
         <option value="atm">ATM 轉帳</option> -->
       </select>
 
-      <label>運送方式 *</label>
+      <!-- <label>運送方式 *</label>
       <select name="shipping_method" required>
         <option value="yourself">自取</option>
-        <!-- <option value="home">宅配</option>
-        <option value="store">超商取貨</option> -->
-      </select>
+        <option value="home">宅配</option>
+        <option value="store">超商取貨</option>
+      </select> -->
 
       <br><br>
       <h2>🛒 訂單明細</h2>
