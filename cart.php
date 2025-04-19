@@ -1,4 +1,8 @@
 <?php
+// if (!empty($_GET['error']) && $_GET['error'] === 'expired') {
+//     echo "<div class='alert alert-warning'>⚠️ 表單已過期或非法跳轉，請重新選擇商品</div>";
+// }
+
 session_start();
 require_once './lib/db.php';
 $conn = getDBConnection();
