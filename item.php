@@ -413,7 +413,7 @@ $otherResult = $stmt2->get_result();
       <div class="carousel-card" onclick="goToProduct('<?php echo $p['product_id']; ?>')">
         <img src="<?php echo htmlspecialchars($p['image_path']); ?>" style="width:100%; height:140px; object-fit:contain;">
         <h4><?php echo htmlspecialchars($p['product_name']); ?></h4>
-        <a href="item.php?product_id=<?php echo $p['product_id']; ?>" class="button primary">前往商品</a>
+        <a href="add_to_cart.php?product_id=<?php echo $p['product_id']; ?>&active=buy" class="button primary">立即購買</a>
       </div>
       <?php endwhile; ?>
     </div>
@@ -427,53 +427,15 @@ $otherResult = $stmt2->get_result();
       btn.textContent = box.classList.contains('expanded') ? '收起' : '查看更多';
     }
 
-    // let scrollIndex = 0;
-    // function scrollCarousel(dir) {
-    //   const track = document.getElementById('carouselTrack');
-    //   const cardWidth = 300;
-    //   scrollIndex += dir;
-    //   scrollIndex = Math.max(0, scrollIndex);
-    //   track.style.transform = `translateX(-${scrollIndex * cardWidth}px)`;
-    // }
-
-
-    document.addEventListener('DOMContentLoaded', () => {
+    let scrollIndex = 0;
+    function scrollCarousel(dir) {
       const track = document.getElementById('carouselTrack');
-      const cards = Array.from(track.children);
-      const cardWidth = 270; // 卡片寬度 + margin-right
-      let scrollIndex = cards.length; // 從中間開始（原始列表第二段）
-
-      // 複製一次原始項目貼到左右兩邊
-      cards.forEach(card => track.appendChild(card.cloneNode(true)));
-      cards.forEach(card => track.insertBefore(card.cloneNode(true), track.firstChild));
-
-      // 設定初始位置
+      const cardWidth = 300;
+      scrollIndex += dir;
+      scrollIndex = Math.max(0, scrollIndex);
       track.style.transform = `translateX(-${scrollIndex * cardWidth}px)`;
+    }
 
-      function scrollCarousel(dir) {
-        const total = track.children.length;
-        scrollIndex += dir;
-
-        track.style.transition = 'transform 0.4s ease';
-        track.style.transform = `translateX(-${scrollIndex * cardWidth}px)`;
-
-        // 無縫重設邏輯
-        track.addEventListener('transitionend', () => {
-          if (scrollIndex >= total - cards.length) {
-            track.style.transition = 'none';
-            scrollIndex = cards.length;
-            track.style.transform = `translateX(-${scrollIndex * cardWidth}px)`;
-          } else if (scrollIndex <= 0) {
-            track.style.transition = 'none';
-            scrollIndex = cards.length;
-            track.style.transform = `translateX(-${scrollIndex * cardWidth}px)`;
-          }
-        }, { once: true });
-      }
-
-      // 全局綁定，保留外部函數調用
-      window.scrollCarousel = scrollCarousel;
-    });
   </script>
 
 
@@ -496,39 +458,6 @@ $otherResult = $stmt2->get_result();
 
 
 <script>
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.buy-link').forEach(link => {
-    link.addEventListener('click', function (e) {
-      e.preventDefault(); // 阻止預設跳轉，先做 fetch 再跳
-
-        const productId = this.dataset.productId;
-        const targetUrl = this.href;
-
-        // 發送加入購物車請求
-        fetch('add_to_cart.php?product_id=' + encodeURIComponent(productId))
-          .then(res => res.text()) // 原本 add_to_cart.php 沒回應 JSON，可以忽略內容
-          .then(() => {
-              // 更新購物車數量
-              return fetch('get_cart_count.php');
-          })
-          .then(res => res.json())
-          .then(data => {
-              if (data.success) {
-                  updateCartCountDisplay(data.cartCount);
-              }
-              // ✅ 確保更新完後再跳轉
-              window.location.href = targetUrl;
-          })
-          .catch(err => {
-              console.error('加入購物車錯誤:', err);
-              window.location.href = targetUrl; // 即使失敗也照樣跳轉
-          });
-    });
-  });
-});
-
-
     function updateCartCountDisplay(count) {
         const cartBtn = document.querySelector('.floating-cart-btn');
         if (cartBtn) {

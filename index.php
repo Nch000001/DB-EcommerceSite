@@ -401,37 +401,6 @@ if ($resultAd->num_rows > 0) {
         window.location.href = 'item.php?product_id=' + encodeURIComponent(productId);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.buy-link').forEach(link => {
-            link.addEventListener('click', function (e) {
-                e.preventDefault(); // 阻止預設跳轉，先做 fetch 再跳
-
-                const productId = this.dataset.productId;
-                const targetUrl = this.href;
-
-                // 發送加入購物車請求
-                fetch('add_to_cart.php?product_id=' + encodeURIComponent(productId))
-                    .then(res => res.text()) // 原本 add_to_cart.php 沒回應 JSON，可以忽略內容
-                    .then(() => {
-                        // 更新購物車數量
-                        return fetch('get_cart_count.php');
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            updateCartCountDisplay(data.cartCount);
-                        }
-                        // ✅ 確保更新完後再跳轉
-                        window.location.href = targetUrl;
-                    })
-                    .catch(err => {
-                        console.error('加入購物車錯誤:', err);
-                        window.location.href = targetUrl; // 即使失敗也照樣跳轉
-                    });
-            });
-        });
-    });
-
     function updateCartCountDisplay(count) {
         const cartBtn = document.querySelector('.floating-cart-btn');
         if (cartBtn) {
