@@ -1,3 +1,10 @@
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>結帳確認</title>
+</head>
+</html>
+
 <?php
 session_start();
 require_once './lib/db.php';
