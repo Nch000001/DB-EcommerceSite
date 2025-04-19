@@ -3,18 +3,22 @@ session_start();
 require_once './lib/db.php';
 $conn = getDBConnection();
 
+$_SESSION['checkout_token'] = bin2hex(random_bytes(16));
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-
 $user_id = $_SESSION['user_id'];
+
+
 
 if (empty($_POST['selected_products'])) {
     echo "❗ 請先選擇商品再進行結帳。";
     header("Location: cart.php");
     exit();
 }
+
 
 $selected = $_POST['selected_products'];
 $errors = [];
@@ -159,7 +163,8 @@ if (!$user) {
           </tr>
         </tfoot>
       </table>
-
+      
+      <input type="hidden" name="token" value="<?php echo $_SESSION['checkout_token']; ?>">
       <button type="submit" class="submit-btn">✅ 確認並提交訂單</button>
     </form>
   </div>
