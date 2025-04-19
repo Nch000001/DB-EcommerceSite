@@ -80,15 +80,32 @@ foreach ($parsed_items as $item) {
 $status = 'not pay';
 $stmt = $conn->prepare("INSERT INTO orders (user_id, status, total_amount) VALUES (?, ?, ?)");
 $stmt->bind_param("ssi", $user_id, $status, $total_amount);
-$stmt->execute();
+if (!$stmt->execute()) {
+    echo "❌ 插入失敗：(" . $stmt->errno . ") " . $stmt->error . "<br>";
+    exit();
+}
 $order_id = $conn->insert_id;
 
-//插入每一筆訂單明細到 order_items
+
+// //插入每一筆訂單明細到 order_items
 $stmtItem = $conn->prepare("INSERT INTO order_item (order_id, product_id, product_name, price, quantity) VALUES (?, ?, ?, ?, ?)");
 foreach ($parsed_items as $item) {
     $stmtItem->bind_param("issii", $order_id, $item['product_id'], $item['name'], $item['price'], $item['quantity']);
-    $stmtItem->execute();
+    if (!$stmtItem->execute()) {
+        echo "❌ 插入失敗：(" . $stmt->errno . ") " . $stmt->error . "<br>";
+        exit();
+    }
 }
 
+// 刪除這些商品在購物車中的紀錄
+$placeholders = implode(',', array_fill(0, count($product_ids), '?'));
+$types = str_repeat('s', count($product_ids));
+$sql = "DELETE FROM cart WHERE user_id = ? AND product_id IN ($placeholders)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('s' . $types, $user_id, ...$product_ids);
+$stmt->execute();
+
+// ✅ 顯示成功訊息並跳轉
+echo "<script>alert('✅ 訂單已成功建立！訂單編號：#{$order_id}'); window.location.href = 'index.php';</script>";
 exit();
 ?>

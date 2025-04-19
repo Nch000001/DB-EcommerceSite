@@ -328,9 +328,6 @@ function deleteProduct(productId, from = '') {
                 <p>您的購物車是空的。</p>
             `;
 
-            // ✅ 移除浮動結帳區塊（可選）
-            // conaddEventListener;
-            // if (summary) summary.remove();
         }
     })
     .catch(err => {

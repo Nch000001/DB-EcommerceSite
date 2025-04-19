@@ -8,16 +8,20 @@ header('Content-Type: text/plain'); // 一定記得加！
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo "未登入";
+    header("Location: login.php");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
 
-$data = json_decode(file_get_contents('php://input'), true);
+if (!isset($data)) {
+    $data = json_decode(file_get_contents('php://input'), true);
+}
 
 if (!isset($data['product_id']) || !isset($data['quantity'])) {
     http_response_code(400);
     echo "參數錯誤";
+    header("Location: index.php");
     exit();
 }
 
